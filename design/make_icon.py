@@ -1,26 +1,25 @@
 from PIL import Image, ImageDraw
 
-# Portugal-distinct palette: deep green (flag-inspired), warm off-white glyph.
-# Deliberately not navy (Tanken's color) so the two apps never get confused
-# on a home screen, while keeping the same flat fuel-pump glyph language.
-BG = (13, 92, 63)       # deep green
+# Light, bright blue — distinct from Tanken's dark navy, still in the same
+# "clean/trustworthy" family the user asked for ("make the blue little
+# light" = a light blue, not the green from the first draft).
+BG = (46, 137, 227)      # light/bright blue
 GLYPH = (255, 255, 255)
 
 
 def draw_pump(draw: ImageDraw.ImageDraw, cx: float, cy: float, s: float, color):
-    """Draws a flat fuel-pump glyph centered at (cx, cy), scaled by s.
+    """Draws a simplified flat fuel-pump glyph centered at (cx, cy).
 
-    Simple boxy silhouette (body + display + a side nozzle holster), closer
-    to well-tested minimal gas-station glyphs than a hand-drawn hose curve —
-    reads cleanly at small sizes, which is what actually matters for an app
-    icon.
+    Dropped the separate nozzle-holster box + floating handle from the first
+    draft (that's what read as "weird") in favor of a single smooth spout
+    line off the body, ending in a small round nozzle tip — fewer disjointed
+    parts, cleaner silhouette.
     """
     lw = max(1, round(26 * s))
 
-    # Overall glyph bounding box (for centering math): body + holster.
-    body_w, body_h = 220 * s, 300 * s
-    holster_w, holster_h = 70 * s, 110 * s
-    total_w = body_w + holster_w + 14 * s
+    body_w, body_h = 240 * s, 300 * s
+    spout_reach = 130 * s
+    total_w = body_w + spout_reach
     total_h = body_h
 
     body_l = cx - total_w / 2
@@ -29,10 +28,10 @@ def draw_pump(draw: ImageDraw.ImageDraw, cx: float, cy: float, s: float, color):
     body_b = body_t + body_h
 
     # Pump body
-    draw.rounded_rectangle([body_l, body_t, body_r, body_b], radius=28 * s, outline=color, width=lw)
+    draw.rounded_rectangle([body_l, body_t, body_r, body_b], radius=30 * s, outline=color, width=lw)
 
     # Display window
-    win_pad_x, win_top, win_h = 30 * s, 30 * s, 110 * s
+    win_pad_x, win_top, win_h = 32 * s, 32 * s, 110 * s
     draw.rounded_rectangle(
         [body_l + win_pad_x, body_t + win_top, body_r - win_pad_x, body_t + win_top + win_h],
         radius=12 * s, outline=color, width=lw,
@@ -44,21 +43,19 @@ def draw_pump(draw: ImageDraw.ImageDraw, cx: float, cy: float, s: float, color):
     draw.line([(body_l + win_pad_x, line_y1), (body_r - win_pad_x, line_y1)], fill=color, width=lw)
     draw.line([(body_l + win_pad_x, line_y2), (body_r - win_pad_x, line_y2)], fill=color, width=lw)
 
-    # Nozzle holster on the right side, attached to the body
-    hol_l = body_r - 6 * s
-    hol_t = body_t + 40 * s
-    hol_r = hol_l + holster_w
-    hol_b = hol_t + holster_h
-    draw.rounded_rectangle([hol_l, hol_t, hol_r, hol_b], radius=16 * s, outline=color, width=lw)
+    # Single spout: one straight diagonal stroke from the body's upper-right
+    # corner to a small round nozzle tip. No bend point — a kinked line was
+    # what made the previous draft look like a golf club.
+    spout_start = (body_r - 8 * s, body_t + 50 * s)
+    spout_end = (body_r + spout_reach * 0.85, body_t + 130 * s)
+    draw.line([spout_start, spout_end], fill=color, width=lw)
+    r = lw / 2
+    draw.ellipse([spout_start[0] - r, spout_start[1] - r, spout_start[0] + r, spout_start[1] + r], fill=color)
 
-    # Nozzle handle poking up out of the holster — outlined like every other
-    # shape in the glyph, not filled, so the whole icon reads as one
-    # consistent line-weight rather than mixing stroke and solid shapes.
-    handle_w = 34 * s
-    handle_x = hol_l + holster_w * 0.55
-    draw.rounded_rectangle(
-        [handle_x - handle_w / 2, hol_t - 50 * s, handle_x + handle_w / 2, hol_t + 14 * s],
-        radius=15 * s, outline=color, width=lw,
+    tip_r = 22 * s
+    draw.ellipse(
+        [spout_end[0] - tip_r, spout_end[1] - tip_r, spout_end[0] + tip_r, spout_end[1] + tip_r],
+        outline=color, width=lw,
     )
 
 
