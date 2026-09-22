@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { translations, TranslationKey } from "../i18n/translations";
 
-const STORAGE_KEY = "tanken:locale";
+const STORAGE_KEY = "tanka:locale";
 
 export type Locale = "de" | "en";
 

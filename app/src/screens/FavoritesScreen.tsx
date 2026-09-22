@@ -13,6 +13,7 @@ import { StationListItem } from "../components/StationListItem";
 import { fetchStationPrices } from "../api/client";
 import { displayPrice } from "../utils/price";
 import { buildPriceRanks } from "../utils/priceTier";
+import { FUEL_TYPES } from "../types/station";
 import { spacing, ColorScheme } from "../theme";
 import { RootStackParamList, TabParamList } from "../navigation/types";
 
@@ -56,13 +57,9 @@ export function FavoritesScreen({ navigation }: Props) {
       for (const id of ids) {
         const entry = prices[id];
         if (!entry) continue;
-        updates[id] = {
-          e5: entry.e5 === false ? null : entry.e5,
-          e10: entry.e10 === false ? null : entry.e10,
-          diesel: entry.diesel === false ? null : entry.diesel,
-          isOpen: entry.status === "open",
-          trend: trends[id],
-        };
+        const patch: Partial<typeof favorites[string]> = { trend: trends[id] };
+        for (const fuel of FUEL_TYPES) patch[fuel] = entry[fuel];
+        updates[id] = patch;
       }
       updateFavoritePrices(updates);
       checkAndNotify(

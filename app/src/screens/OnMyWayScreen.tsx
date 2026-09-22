@@ -334,7 +334,7 @@ export function OnMyWayScreen({ navigation }: Props) {
             </Marker>
             {stations.map((station, index) => {
               const tier = tiers.get(index) ?? "mid";
-              const pinColor = station.isOpen ? tierColors[tier] : colors.closed;
+              const pinColor = tierColors[tier];
               return (
                 <Marker
                   key={station.id}

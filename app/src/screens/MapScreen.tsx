@@ -12,7 +12,6 @@ import { useAlarms } from "../context/AlarmsContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLocale } from "../context/LocaleContext";
 import { FuelTypeFilter } from "../components/FuelTypeFilter";
-import { OpenNowToggle } from "../components/OpenNowToggle";
 import { StationInfoPanel } from "../components/StationInfoPanel";
 import { displayPrice, formatPrice } from "../utils/price";
 import { buildPriceRanks } from "../utils/priceTier";
@@ -28,7 +27,7 @@ type Props = CompositeScreenProps<
 
 export function MapScreen({ navigation }: Props) {
   const { coords, errorMsg, loading: locationLoading, retry: retryLocation } = useLocation();
-  const { fuelType, setFuelType, openNowOnly, setOpenNowOnly } = useStationFilters();
+  const { fuelType, setFuelType } = useStationFilters();
   const { stations, loading: stationsLoading, error: stationsError, refresh } = useNearbyStations(
     coords,
     { type: fuelType, rad: MAX_RADIUS_KM }
@@ -59,14 +58,9 @@ export function MapScreen({ navigation }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stations]);
 
-  const visible = useMemo(
-    () => (openNowOnly ? stations.filter((s) => s.isOpen) : stations),
-    [stations, openNowOnly]
-  );
-
   const tiers = useMemo(
-    () => buildPriceRanks(visible.map((s) => displayPrice(s, fuelType))),
-    [visible, fuelType]
+    () => buildPriceRanks(stations.map((s) => displayPrice(s, fuelType))),
+    [stations, fuelType]
   );
 
   if (locationLoading) {
@@ -95,7 +89,6 @@ export function MapScreen({ navigation }: Props) {
           <FuelTypeFilter value={fuelType} onChange={setFuelType} />
         </View>
         <View style={styles.filterRow2}>
-          <OpenNowToggle value={openNowOnly} onChange={setOpenNowOnly} />
           <Pressable style={styles.onMyWayPill} onPress={() => navigation.navigate("OnMyWay")}>
             <Ionicons name="navigate-outline" size={14} color={colors.textSecondary} />
             <Text style={styles.onMyWayPillText}>{t("map.onMyWay")}</Text>
@@ -121,9 +114,9 @@ export function MapScreen({ navigation }: Props) {
           // on the user automatically, so there's no need for it.
           showsMyLocationButton={false}
         >
-          {visible.map((station, index) => {
+          {stations.map((station, index) => {
             const tier = tiers.get(index) ?? "mid";
-            const pinColor = station.isOpen ? tierColor[tier] : colors.closed;
+            const pinColor = tierColor[tier];
             return (
               <Marker
                 key={station.id}
@@ -166,14 +159,14 @@ export function MapScreen({ navigation }: Props) {
           )}
         </Pressable>
 
-        {stationsLoading && visible.length === 0 && (
+        {stationsLoading && stations.length === 0 && (
           <View style={styles.statusBanner} pointerEvents="none">
             <ActivityIndicator size="small" color={colors.textPrimary} />
             <Text style={styles.statusBannerText}>{t("map.loadingStations")}</Text>
           </View>
         )}
 
-        {!stationsLoading && stationsError && visible.length === 0 && (
+        {!stationsLoading && stationsError && stations.length === 0 && (
           <View style={styles.statusBanner}>
             <Text style={styles.statusBannerText}>{t("map.loadError")}</Text>
             <Text style={styles.statusBannerRetry} onPress={refresh}>

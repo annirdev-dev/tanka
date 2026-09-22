@@ -14,11 +14,11 @@ import { usePurchase } from "../context/PurchaseContext";
 import { useTheme, ThemeMode } from "../context/ThemeContext";
 import { useLocale, Locale } from "../context/LocaleContext";
 import { OptionDropdown } from "../components/OptionDropdown";
-import { OpenNowToggle } from "../components/OpenNowToggle";
 import { AccountSection } from "../components/AccountSection";
 import { requestAppReview, shareApp } from "../lib/appReview";
 import { radii, spacing, ColorScheme } from "../theme";
 import { RootStackParamList, TabParamList } from "../navigation/types";
+import { FUEL_LABELS, FUEL_TYPES } from "../types/station";
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<TabParamList, "Settings">,
@@ -28,7 +28,7 @@ type Props = CompositeScreenProps<
 export function SettingsScreen({ navigation }: Props) {
   const { favorites, clearAllFavorites } = useFavorites();
   const { alarms, clearAllAlarms, savingsEvents, clearSavings } = useAlarms();
-  const { fuelType, setFuelType, openNowOnly, setOpenNowOnly } = useStationFilters();
+  const { fuelType, setFuelType } = useStationFilters();
   const { mode, setMode, colors } = useTheme();
   const { locale, setLocale, t } = useLocale();
   const {
@@ -118,9 +118,7 @@ export function SettingsScreen({ navigation }: Props) {
   ];
   const fuelTypeOptions: { label: string; value: typeof fuelType }[] = [
     { label: t("fuel.all"), value: "all" },
-    { label: "E5", value: "e5" },
-    { label: "E10", value: "e10" },
-    { label: t("fuel.diesel"), value: "diesel" },
+    ...FUEL_TYPES.map((fuel) => ({ label: FUEL_LABELS[fuel], value: fuel })),
   ];
 
   return (
@@ -203,7 +201,6 @@ export function SettingsScreen({ navigation }: Props) {
               value={fuelType}
               onChange={setFuelType}
             />
-            <OpenNowToggle value={openNowOnly} onChange={setOpenNowOnly} />
           </View>
         </View>
       </Section>

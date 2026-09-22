@@ -13,13 +13,13 @@ import { fetchServerTime } from "../api/client";
 // both App Store Connect and Google Play Console. Must match on both sides.
 export const PRO_PRODUCT_ID = "tanken_pro_unlock";
 
-const STORAGE_KEY = "tanken:has-pro";
+const STORAGE_KEY = "tanka:has-pro";
 // Per-account local cache of that account's trial start — offline fallback
 // only; the server (user_data.trial_started_at) is the source of truth.
-const TRIAL_START_CACHE_PREFIX = "tanken:trial-start:";
+const TRIAL_START_CACHE_PREFIX = "tanka:trial-start:";
 // Highest server-verified wall-clock time this device has ever seen — a floor
 // under "now" so rolling the device clock back can't revive an expired trial.
-const TRIAL_SEEN_MAX_KEY = "tanken:trial-seen-max";
+const TRIAL_SEEN_MAX_KEY = "tanka:trial-seen-max";
 const TRIAL_DURATION_DAYS = 3;
 const TRIAL_DURATION_MS = TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000;
 

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Pressable, Share, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { FuelType, Station } from "../types/station";
+import { FUEL_LABELS, FuelType, Station } from "../types/station";
 import { displayPrice, formatPrice } from "../utils/price";
 import { PriceTier } from "../utils/priceTier";
 import { radii, spacing, ColorScheme } from "../theme";
@@ -12,11 +12,8 @@ import { FavoriteButton } from "./FavoriteButton";
 import { useFavorites } from "../context/FavoritesContext";
 
 function trendForFuelType(station: Station, fuelType: FuelType) {
-  if (!station.trend) return null;
-  if (fuelType === "e5") return station.trend.e5 ?? null;
-  if (fuelType === "e10") return station.trend.e10 ?? null;
-  if (fuelType === "diesel") return station.trend.diesel ?? null;
-  return null;
+  if (!station.trend || fuelType === "all") return null;
+  return station.trend[fuelType] ?? null;
 }
 
 export function StationListItem({
@@ -40,14 +37,7 @@ export function StationListItem({
   const price = displayPrice(station, fuelType);
 
   const handleShare = () => {
-    const fuelLabel =
-      fuelType === "e5"
-        ? "E5"
-        : fuelType === "e10"
-          ? "E10"
-          : fuelType === "diesel"
-            ? t("fuel.diesel")
-            : t("share.cheapest");
+    const fuelLabel = fuelType === "all" ? t("share.cheapest") : FUEL_LABELS[fuelType];
     Share.share({
       message: t("share.message", {
         name: station.brand || station.name,
@@ -70,15 +60,11 @@ export function StationListItem({
             {station.street}, {station.place}
           </Text>
         )}
-        <View style={styles.statusRow}>
-          <View style={[styles.dot, { backgroundColor: station.isOpen ? colors.cheap : colors.closed }]} />
-          <Text style={styles.statusText}>
-            {station.isOpen ? t("status.open") : t("status.closed")}
-          </Text>
-          {station.dist != null && (
-            <Text style={styles.dist}>· {station.dist.toFixed(1)} km</Text>
-          )}
-        </View>
+        {station.dist != null && (
+          <View style={styles.statusRow}>
+            <Text style={styles.dist}>{station.dist.toFixed(1)} km</Text>
+          </View>
+        )}
       </View>
       <View style={[styles.right, compact && styles.rightCompact]}>
         {!compact && (
@@ -119,9 +105,7 @@ function createStyles(colors: ColorScheme) {
     nameCompact: { fontSize: 14 },
     address: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
     statusRow: { flexDirection: "row", alignItems: "center", marginTop: spacing.xs },
-    dot: { width: 6, height: 6, borderRadius: 3, marginRight: 5 },
-    statusText: { fontSize: 12, color: colors.textSecondary, fontWeight: "500" },
-    dist: { fontSize: 12, color: colors.textMuted, marginLeft: 4 },
+    dist: { fontSize: 12, color: colors.textMuted },
     right: { alignItems: "flex-end", justifyContent: "center", paddingVertical: spacing.sm, paddingRight: spacing.md, paddingLeft: spacing.xs, gap: 2 },
     iconRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
     shareButton: { padding: 6 },

@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
 import { fetchStationDetail } from "../api/client";
-import { Station, StationDetail, TrendInfo } from "../types/station";
+import { FUEL_NAMES, FUEL_TYPES, Station, StationDetail, TrendInfo } from "../types/station";
 import { formatPrice } from "../utils/price";
 import { radii, spacing, ColorScheme } from "../theme";
 import { useTheme } from "../context/ThemeContext";
@@ -65,9 +65,9 @@ export function StationDetailScreen({ route }: Props) {
     );
   }
 
-  const addressLine = [station.street, station.houseNumber].filter(Boolean).join(" ");
   const cityLine = [station.postCode, station.place].filter(Boolean).join(" ");
-  const chartFuelType = fuelType === "all" ? "e5" : fuelType;
+  const chartFuelType = fuelType === "all" ? FUEL_TYPES[0] : fuelType;
+  const availableFuels = FUEL_TYPES.filter((f) => station[f] != null);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -75,8 +75,8 @@ export function StationDetailScreen({ route }: Props) {
         <View style={styles.headerText}>
           <Text style={styles.name}>{station.brand || station.name}</Text>
           <Text style={styles.address}>
-            {addressLine}
-            {addressLine && cityLine ? ", " : ""}
+            {station.street}
+            {station.street && cityLine ? ", " : ""}
             {cityLine}
           </Text>
         </View>
@@ -98,19 +98,18 @@ export function StationDetailScreen({ route }: Props) {
         <Text style={styles.directionsButtonText}>{t("detail.directions")}</Text>
       </Pressable>
 
-      <View style={styles.statusRow}>
-        <View style={[styles.dot, { backgroundColor: station.isOpen ? colors.cheap : colors.closed }]} />
-        <Text style={[styles.status, station.isOpen ? styles.open : styles.closed]}>
-          {station.isOpen ? t("status.openNow") : t("status.closed")}
-        </Text>
-      </View>
-
       <View style={styles.priceCard}>
-        <PriceRow label={t("detail.fuelE5")} value={station.e5} trend={station.trend?.e5} styles={styles} />
-        <View style={styles.priceDivider} />
-        <PriceRow label={t("detail.fuelE10")} value={station.e10} trend={station.trend?.e10} styles={styles} />
-        <View style={styles.priceDivider} />
-        <PriceRow label={t("detail.fuelDiesel")} value={station.diesel} trend={station.trend?.diesel} styles={styles} />
+        {availableFuels.map((fuel, index) => (
+          <React.Fragment key={fuel}>
+            <PriceRow
+              label={FUEL_NAMES[fuel]}
+              value={station[fuel]}
+              trend={station.trend?.[fuel]}
+              styles={styles}
+            />
+            {index < availableFuels.length - 1 && <View style={styles.priceDivider} />}
+          </React.Fragment>
+        ))}
       </View>
 
       <PriceHistoryChart stationId={station.id} fuelType={chartFuelType} />
@@ -161,13 +160,8 @@ function createStyles(colors: ColorScheme) {
     directionsButtonText: { color: colors.accentOn, fontSize: 14, fontWeight: "700" },
     name: { fontSize: 22, fontWeight: "800", color: colors.textPrimary },
     address: { fontSize: 14, color: colors.textSecondary, marginTop: 6 },
-    statusRow: { flexDirection: "row", alignItems: "center", marginTop: spacing.sm },
-    dot: { width: 7, height: 7, borderRadius: 4, marginRight: 6 },
-    status: { fontSize: 14, fontWeight: "600" },
-    open: { color: colors.cheap },
-    closed: { color: colors.closed },
     priceCard: {
-      marginTop: spacing.lg,
+      marginTop: spacing.md,
       borderRadius: radii.md,
       backgroundColor: colors.surface,
       borderWidth: 1,

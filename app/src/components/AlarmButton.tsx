@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Station } from "../types/station";
+import { FUEL_LABELS, FUEL_TYPES, Station } from "../types/station";
 import { radii, spacing, ColorScheme } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { useLocale } from "../context/LocaleContext";
@@ -9,15 +9,14 @@ import { useAlarms, AlarmFuelType } from "../context/AlarmsContext";
 import { useStationFilters } from "../context/StationFiltersContext";
 import { usePurchase } from "../context/PurchaseContext";
 
-const FUEL_OPTIONS: { label: string; value: AlarmFuelType }[] = [
-  { label: "E5", value: "e5" },
-  { label: "E10", value: "e10" },
-  { label: "Diesel", value: "diesel" },
-];
+const FUEL_OPTIONS: { label: string; value: AlarmFuelType }[] = FUEL_TYPES.map((fuel) => ({
+  label: FUEL_LABELS[fuel],
+  value: fuel,
+}));
 
 export function AlarmButton({ station }: { station: Station }) {
   const { fuelType } = useStationFilters();
-  const defaultFuelType: AlarmFuelType = fuelType === "all" ? "e5" : fuelType;
+  const defaultFuelType: AlarmFuelType = fuelType === "all" ? FUEL_TYPES[0] : fuelType;
   const { getAlarm, setAlarm, clearAlarm } = useAlarms();
   const { hasPro, presentPaywall } = usePurchase();
   const { colors } = useTheme();
@@ -28,8 +27,7 @@ export function AlarmButton({ station }: { station: Station }) {
   const [input, setInput] = useState(existing ? String(existing.targetPrice) : "");
   const [selectedFuel, setSelectedFuel] = useState<AlarmFuelType>(existing?.fuelType ?? defaultFuelType);
 
-  const priceForFuel = (fuel: AlarmFuelType) =>
-    fuel === "e5" ? station.e5 : fuel === "e10" ? station.e10 : station.diesel;
+  const priceForFuel = (fuel: AlarmFuelType) => station[fuel];
 
   const save = () => {
     const target = Number(input.replace(",", "."));
@@ -65,7 +63,7 @@ export function AlarmButton({ station }: { station: Station }) {
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
           <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
             <Text style={styles.title}>
-              {t("alerts.title", { fuel: selectedFuel.toUpperCase() })}
+              {t("alerts.title", { fuel: FUEL_LABELS[selectedFuel] })}
             </Text>
             <Text style={styles.hint}>
               {t("alerts.hint", { station: station.brand || station.name })}
@@ -149,11 +147,12 @@ function createStyles(colors: ColorScheme) {
     },
     title: { fontSize: 16, fontWeight: "800", color: colors.textPrimary },
     hint: { fontSize: 13, color: colors.textSecondary, marginTop: spacing.sm, lineHeight: 18 },
-    fuelRow: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.md },
+    fuelRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, marginTop: spacing.md },
     fuelChip: {
-      flex: 1,
+      minWidth: 64,
       alignItems: "center",
       paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.md,
       borderRadius: radii.sm,
       backgroundColor: colors.surface,
       borderWidth: 1,

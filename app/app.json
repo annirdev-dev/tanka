@@ -33,7 +33,7 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "REPLACE_WITH_NEW_GOOGLE_MAPS_API_KEY"
+          "apiKey": "AIzaSyB9IgALWl23qd8eN3F8Bswz3o3kzeSEghg"
         }
       }
     },
@@ -53,11 +53,16 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "REPLACE_WITH_NEW_GOOGLE_IOS_URL_SCHEME"
+          "iosUrlScheme": "com.googleusercontent.apps.598383804471-30clmudvk67iplga0le45rnb0k5lfdc4"
         }
       ],
       "expo-iap"
     ],
-    "owner": "aniro99"
+    "owner": "aniro99",
+    "extra": {
+      "eas": {
+        "projectId": "da8d3201-46a7-4518-a374-25712a27f6fd"
+      }
+    }
   }
 }

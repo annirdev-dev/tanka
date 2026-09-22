@@ -2,12 +2,12 @@ import React, { createContext, useContext, useEffect, useMemo, useRef, useState 
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "../lib/notifications";
-import { FuelType, Station } from "../types/station";
+import { FUEL_LABELS, FuelType, Station } from "../types/station";
 
 const PRICE_ALERT_CHANNEL_ID = "price-alerts";
 
-const STORAGE_KEY = "tanken:alarms";
-const SAVINGS_STORAGE_KEY = "tanken:savings";
+const STORAGE_KEY = "tanka:alarms";
+const SAVINGS_STORAGE_KEY = "tanka:savings";
 // Re-notifying for the same still-triggered alarm on every foreground data
 // refresh would spam the user — space repeat alerts out by this much.
 const RENOTIFY_INTERVAL_MS = 6 * 60 * 60_000;
@@ -78,9 +78,7 @@ if (Platform.OS === "android") {
 }
 
 function priceFor(station: Station, fuelType: AlarmFuelType): number | null {
-  if (fuelType === "e5") return station.e5;
-  if (fuelType === "e10") return station.e10;
-  return station.diesel;
+  return station[fuelType];
 }
 
 export function AlarmsProvider({ children }: { children: React.ReactNode }) {
@@ -159,7 +157,7 @@ export function AlarmsProvider({ children }: { children: React.ReactNode }) {
         Notifications.scheduleNotificationAsync({
           content: {
             title: `${alarm.stationName}: price alert`,
-            body: `${alarm.fuelType.toUpperCase()} is now ${price.toFixed(3)} € (target ${alarm.targetPrice.toFixed(3)} €)`,
+            body: `${FUEL_LABELS[alarm.fuelType]} is now ${price.toFixed(3)} € (target ${alarm.targetPrice.toFixed(3)} €)`,
           },
           trigger: Platform.OS === "android" ? { channelId: PRICE_ALERT_CHANNEL_ID } : null,
         }).catch(() => undefined);

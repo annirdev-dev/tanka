@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { FuelType } from "../types/station";
+import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { FUEL_LABELS, FUEL_TYPES, FuelType } from "../types/station";
 import { radii, spacing, ColorScheme } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { useLocale } from "../context/LocaleContext";
@@ -18,26 +18,24 @@ export function FuelTypeFilter({
 
   const options: { label: string; value: FuelType }[] = [
     { label: t("fuel.all"), value: "all" },
-    { label: "E5", value: "e5" },
-    { label: "E10", value: "e10" },
-    { label: t("fuel.diesel"), value: "diesel" },
+    ...FUEL_TYPES.map((fuel) => ({ label: FUEL_LABELS[fuel], value: fuel })),
   ];
 
   return (
-    <View style={styles.track}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.track}>
       {options.map((option) => {
         const active = option.value === value;
         return (
           <Pressable
             key={option.value}
-            style={[styles.segment, active && styles.segmentActive]}
+            style={[styles.chip, active && styles.chipActive]}
             onPress={() => onChange(option.value)}
           >
             <Text style={[styles.label, active && styles.labelActive]}>{option.label}</Text>
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -45,17 +43,17 @@ function createStyles(colors: ColorScheme) {
   return StyleSheet.create({
     track: {
       flexDirection: "row",
-      backgroundColor: colors.pillInactive,
-      borderRadius: radii.md,
-      padding: 3,
+      gap: spacing.xs,
     },
-    segment: {
-      flex: 1,
+    chip: {
       alignItems: "center",
+      justifyContent: "center",
       paddingVertical: spacing.sm,
-      borderRadius: radii.sm,
+      paddingHorizontal: spacing.md,
+      borderRadius: radii.pill,
+      backgroundColor: colors.pillInactive,
     },
-    segmentActive: {
+    chipActive: {
       backgroundColor: colors.background,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },

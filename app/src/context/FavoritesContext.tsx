@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Station } from "../types/station";
 
-const STORAGE_KEY = "tanken:favorites";
+const STORAGE_KEY = "tanka:favorites";
 
 interface FavoritesContextValue {
   favorites: Record<string, Station>;

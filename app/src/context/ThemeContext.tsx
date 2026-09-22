@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ColorScheme, darkColors, lightColors } from "../theme";
 
-const STORAGE_KEY = "tanken:theme-mode";
+const STORAGE_KEY = "tanka:theme-mode";
 
 export type ThemeMode = "light" | "dark";
 

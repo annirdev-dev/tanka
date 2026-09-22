@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const STORAGE_KEY = "tanken:location-override";
+const STORAGE_KEY = "tanka:location-override";
 
 export interface Coords {
   lat: number;
