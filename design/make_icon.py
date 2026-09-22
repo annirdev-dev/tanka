@@ -51,12 +51,14 @@ def draw_pump(draw: ImageDraw.ImageDraw, cx: float, cy: float, s: float, color):
     hol_b = hol_t + holster_h
     draw.rounded_rectangle([hol_l, hol_t, hol_r, hol_b], radius=16 * s, outline=color, width=lw)
 
-    # Nozzle handle poking up out of the holster
-    handle_w = 26 * s
+    # Nozzle handle poking up out of the holster — outlined like every other
+    # shape in the glyph, not filled, so the whole icon reads as one
+    # consistent line-weight rather than mixing stroke and solid shapes.
+    handle_w = 34 * s
     handle_x = hol_l + holster_w * 0.55
     draw.rounded_rectangle(
-        [handle_x - handle_w / 2, hol_t - 46 * s, handle_x + handle_w / 2, hol_t + 10 * s],
-        radius=13 * s, fill=color,
+        [handle_x - handle_w / 2, hol_t - 50 * s, handle_x + handle_w / 2, hol_t + 14 * s],
+        radius=15 * s, outline=color, width=lw,
     )
 
 
