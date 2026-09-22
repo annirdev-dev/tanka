@@ -77,7 +77,7 @@ def make_android_foreground():
     transparent = (0, 0, 0, 0)
     img = Image.new("RGBA", (512, 512), transparent)
     d = ImageDraw.Draw(img)
-    draw_pump(d, cx=256, cy=256, s=0.5, color=GLYPH, bg=transparent)
+    draw_pump(d, cx=256, cy=256, s=0.44, color=GLYPH, bg=transparent)
     img.save("/Users/annir/Tanka/design/android-icon-foreground.png")
 
 
@@ -90,7 +90,7 @@ def make_android_monochrome():
     transparent = (0, 0, 0, 0)
     img = Image.new("RGBA", (432, 432), transparent)
     d = ImageDraw.Draw(img)
-    draw_pump(d, cx=216, cy=216, s=0.42, color=(255, 255, 255), bg=transparent)
+    draw_pump(d, cx=216, cy=216, s=0.37, color=(255, 255, 255), bg=transparent)
     img.save("/Users/annir/Tanka/design/android-icon-monochrome.png")
 
 
