@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tanka — Suporte, Privacidade e Termos</title>
+<style>
+  :root {
+    --accent: #1A8A60;
+    --accent-on: #ffffff;
+    --bg: #ffffff;
+    --surface: #f7f8fa;
+    --border: #e8e9ec;
+    --text: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    background: var(--accent);
+    color: var(--accent-on);
+    padding: 32px 20px;
+    text-align: center;
+  }
+  header h1 { margin: 0 0 4px; font-size: 28px; }
+  header p { margin: 0; opacity: 0.9; font-size: 15px; }
+  .lang-toggle {
+    margin-top: 16px;
+  }
+  .lang-toggle button {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: var(--accent-on);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0 4px;
+  }
+  .lang-toggle button.active {
+    background: var(--accent-on);
+    color: var(--accent);
+  }
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    flex-wrap: wrap;
+  }
+  nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 8px;
+  }
+  nav a:hover { background: var(--surface); color: var(--text); }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+  section {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  section h2 {
+    margin-top: 0;
+    font-size: 22px;
+  }
+  .updated {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: -8px;
+    margin-bottom: 24px;
+  }
+  article h3 {
+    font-size: 15px;
+    margin-bottom: 6px;
+    margin-top: 24px;
+  }
+  article p {
+    margin-top: 0;
+    color: var(--text-secondary);
+    font-size: 14.5px;
+  }
+  .contact-box {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 16px;
+  }
+  .contact-box a {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 16px;
+  }
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 24px;
+  }
+  [data-lang-content] { display: none; }
+  [data-lang-content].active { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Tanka</h1>
+  <p data-lang-content data-lang="pt" class="active">Preços de combustível em tempo real, em Portugal</p>
+  <p data-lang-content data-lang="en">Real-time fuel prices in Portugal</p>
+  <div class="lang-toggle">
+    <button id="btn-pt" class="active" onclick="setLang('pt')">Português</button>
+    <button id="btn-en" onclick="setLang('en')">English</button>
+  </div>
+</header>
+
+<nav>
+  <a href="#support">Suporte / Support</a>
+  <a href="#privacy">Privacidade / Privacy</a>
+  <a href="#terms">Termos / Terms</a>
+</nav>
+
+<main>
+
+  <section id="support">
+    <div data-lang-content data-lang="pt" class="active">
+      <h2>Suporte</h2>
+      <p>Tens uma pergunta, encontraste um problema, ou queres sugerir algo? Contacta-nos diretamente — respondemos a todos os emails.</p>
+      <div class="contact-box">
+        <a href="mailto:annirdev@gmail.com">annirdev@gmail.com</a>
+      </div>
+    </div>
+    <div data-lang-content data-lang="en">
+      <h2>Support</h2>
+      <p>Have a question, found a bug, or want to suggest something? Reach out directly — we reply to every email.</p>
+      <div class="contact-box">
+        <a href="mailto:annirdev@gmail.com">annirdev@gmail.com</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div data-lang-content data-lang="pt" class="active">
+      <h2>Política de Privacidade</h2>
+      <p class="updated">Última atualização: 2026</p>
+      <article id="privacy-pt"></article>
+    </div>
+    <div data-lang-content data-lang="en">
+      <h2>Privacy Policy</h2>
+      <p class="updated">Last updated: 2026</p>
+      <article id="privacy-en"></article>
+    </div>
+  </section>
+
+  <section id="terms">
+    <div data-lang-content data-lang="pt" class="active">
+      <h2>Termos de Utilização</h2>
+      <p class="updated">Última atualização: 2026</p>
+      <article id="terms-pt"></article>
+    </div>
+    <div data-lang-content data-lang="en">
+      <h2>Terms of Use</h2>
+      <p class="updated">Last updated: 2026</p>
+      <article id="terms-en"></article>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  © 2026 Annir Dev
+</footer>
+
+<script>
+function setLang(lang) {
+  document.querySelectorAll('[data-lang-content]').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-lang') === lang);
+  });
+  document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+}
+
+const CONTACT_EMAIL = "annirdev@gmail.com";
+const ENTITY_NAME = "Annir Dev";
+
+const privacyPolicy = {
+  pt: [
+    { h: "Visão geral", b: `O Tanka („a app") ajuda-te a encontrar e comparar preços de combustível em postos de abastecimento em Portugal. Esta política explica que dados a app recolhe, porquê, e como são tratados. A app é operada por ${ENTITY_NAME}.` },
+    { h: "Dados de localização", b: "A app pede a localização do teu dispositivo para encontrar postos de abastecimento perto de ti. As tuas coordenadas são enviadas apenas para o nosso servidor de backend, para consultar o serviço API Aberta em busca de postos próximos — não são armazenadas, registadas ou partilhadas com ninguém para além dessa única consulta. Se usares a funcionalidade „A caminho\" para pesquisar ao longo de uma rota, as coordenadas de partida e destino são também enviadas para a API Routes da Google para calcular o trajeto de condução. Podes recusar ou revogar o acesso à localização a qualquer momento nas definições do teu dispositivo; sem ele, a app não funciona." },
+    { h: "Dados guardados no teu dispositivo", b: "Os teus postos favoritos, alertas de preço e preferências da app (tipo de combustível, tema, idioma) são guardados localmente no teu dispositivo. Estes dados não são enviados para lado nenhum, a menos que optes por iniciar sessão (ver abaixo)." },
+    { h: "Conta e sincronização (opcional)", b: "Se optares por iniciar sessão com a Apple ou a Google, recebemos o teu nome e endereço de email (ou um endereço de reencaminhamento privado, caso uses o „Ocultar o Meu Email\" da Apple) desse fornecedor, exclusivamente para identificar a tua conta. A tua conta, favoritos e alertas de preço são depois guardados na Supabase, o nosso fornecedor de infraestrutura de backend (autenticação e alojamento de base de dados), para que os possas aceder em vários dispositivos. A Supabase processa estes dados apenas em nosso nome e não os utiliza para fins próprios. Nunca recebemos nem armazenamos a tua palavra-passe da Apple ou da Google. Podes eliminar a tua conta e todos os dados sincronizados a qualquer momento a partir das Definições." },
+    { h: "Notificações", b: "Se configurares um alerta de preço, guardamos um token de notificações push do dispositivo (através do serviço de notificações push da Expo) para podermos verificar os preços periodicamente no nosso servidor e notificar-te mesmo com a app fechada. Não conseguimos ver nem aceder ao conteúdo de notificações push enviadas para outras apps, e este token só é usado para entregar os teus próprios alertas de preço." },
+    { h: "O que não fazemos", b: "Não mostramos anúncios, não usamos SDKs de análise ou rastreio, nem vendemos ou partilhamos os teus dados com anunciantes ou corretores de dados. Os únicos terceiros envolvidos são a API Aberta (dados de preços de combustível), a API Routes da Google (trajetos de condução para „A caminho\"), a Supabase (infraestrutura de backend para conta e armazenamento de dados) e a Apple/Google (apenas se optares por iniciar sessão)." },
+    { h: "Os teus direitos", b: "Podes limpar os teus favoritos e alertas de preço a qualquer momento a partir das Definições. Se tiveres uma conta, podes pedir a eliminação da tua conta e de todos os dados associados a partir das Definições, ou contactando-nos. Se estiveres na UE/EEE, tens direitos ao abrigo do RGPD, incluindo acesso, retificação e eliminação dos teus dados." },
+    { h: "Alterações a esta política", b: "Podemos atualizar esta política periodicamente. Alterações relevantes serão refletidas atualizando a data acima." },
+    { h: "Contacto", b: `Tens dúvidas sobre esta política? Contacta ${CONTACT_EMAIL}.` },
+  ],
+  en: [
+    { h: "Overview", b: `Tanka ("the app") helps you find and compare fuel prices at gas stations in Portugal. This policy explains what data the app collects, why, and how it's handled. The app is operated by ${ENTITY_NAME}.` },
+    { h: "Location data", b: "The app requests your device location to find fuel stations near you. Your coordinates are sent to our backend server only to query the API Aberta service for nearby stations — they are not stored, logged, or shared with anyone beyond that single request. If you use \"On My Way\" to search along a route, your start and destination coordinates are additionally sent to Google's Routes API to calculate the driving directions. You can deny or revoke location access at any time in your device Settings; the app will not function without it." },
+    { h: "Data stored on your device", b: "Your favorite stations, price alerts, and app preferences (fuel type, theme, language) are stored locally on your device. This data is not sent anywhere unless you choose to sign in (see below)." },
+    { h: "Account & sync (optional)", b: "If you choose to sign in with Apple or Google, we receive your name and email address (or a private relay address, if you use Apple's \"Hide My Email\") from that provider, solely to identify your account. Your account, favorites, and price alerts are then stored with Supabase, our backend infrastructure provider (authentication and database hosting), so you can access them on multiple devices. Supabase processes this data only on our behalf and does not use it for its own purposes. We never receive or store your Apple or Google password. You can delete your account and all synced data at any time from Settings." },
+    { h: "Notifications", b: "If you set a price alert, we store a device push token (via the Expo push notification service) so we can check prices periodically on our server and notify you even while the app is closed. We can't see or read the content of push notifications sent to other apps, and this token is only ever used to deliver your own price alerts." },
+    { h: "What we don't do", b: "We don't show ads, use analytics or tracking SDKs, or sell or share your data with advertisers or data brokers. The only third parties involved are API Aberta (fuel price data), Google's Routes API (driving directions for \"On My Way\"), Supabase (backend infrastructure for account and data storage), and Apple/Google (only if you choose to sign in)." },
+    { h: "Your rights", b: "You can clear your favorites and price alerts at any time from Settings. If you have an account, you can request deletion of your account and all associated data from Settings, or by contacting us. If you are in the EU/EEA, you have rights under the GDPR including access, correction, and erasure of your data." },
+    { h: "Changes to this policy", b: "We may update this policy from time to time. Material changes will be reflected by updating the date above." },
+    { h: "Contact", b: `Questions about this policy? Contact ${CONTACT_EMAIL}.` },
+  ],
+};
+
+const terms = {
+  pt: [
+    { h: "Aceitação", b: `Ao usares o Tanka („a app"), aceitas estes termos. Se não concordares, por favor não uses a app. A app é operada por ${ENTITY_NAME}.` },
+    { h: "O que é a app", b: "O Tanka mostra preços de combustível em postos de abastecimento em Portugal, obtidos a partir do serviço API Aberta, para fins informativos. Os preços são reportados quase em tempo real, mas podem ocasionalmente estar atrasados, em falta ou incorretos. Confirma sempre o preço na bomba antes de abastecer — a app não substitui essa verificação." },
+    { h: "Contas", b: "Se iniciares sessão, és responsável por manter a tua conta segura e por toda a atividade realizada através dela. Podes pedir a eliminação da tua conta a qualquer momento. Podemos suspender ou encerrar contas que abusem do serviço." },
+    { h: "Utilização aceitável", b: "Não uses a app para extrair, revender ou redistribuir em massa os dados de preços subjacentes, tentar contornar limites de utilização, fazer engenharia inversa do backend, ou de outra forma interferir com o serviço ou com a API da API Aberta de formas que violem os próprios termos de utilização da API Aberta." },
+    { h: "Sem garantias", b: "A app e os seus dados são fornecidos „tal como estão\", sem garantias de qualquer tipo, expressas ou implícitas, incluindo precisão, disponibilidade ou adequação a um fim específico." },
+    { h: "Limitação de responsabilidade", b: `Na máxima medida permitida por lei, ${ENTITY_NAME} não é responsável por quaisquer danos resultantes do teu uso, ou incapacidade de usar, a app, incluindo confiar em dados de preços que se revelem incorretos.` },
+    { h: "Serviços de terceiros", b: "A app depende da API Aberta (apiaberta.pt) para os dados de preços de combustível, da API Routes da Google para os trajetos de condução de „A caminho\", e, caso inicies sessão, da Apple ou Google para autenticação. A tua utilização desses serviços está também sujeita aos respetivos termos próprios." },
+    { h: "Alterações", b: "Podemos atualizar estes termos periodicamente. A utilização continuada da app após as alterações entrarem em vigor significa que aceitas os termos atualizados." },
+    { h: "Contacto", b: `Tens dúvidas sobre estes termos? Contacta ${CONTACT_EMAIL}.` },
+  ],
+  en: [
+    { h: "Acceptance", b: `By using Tanka ("the app"), you agree to these terms. If you don't agree, please don't use the app. The app is operated by ${ENTITY_NAME}.` },
+    { h: "What the app is", b: "Tanka shows fuel prices at gas stations in Portugal, sourced from the API Aberta service, for informational purposes. Prices are reported near real-time but may occasionally be delayed, missing, or inaccurate. Always confirm the price at the pump before fueling — the app is not a substitute for that." },
+    { h: "Accounts", b: "If you sign in, you're responsible for keeping your account secure and for all activity under it. You may request deletion of your account at any time. We may suspend or terminate accounts that abuse the service." },
+    { h: "Acceptable use", b: "Don't use the app to scrape, resell, or redistribute the underlying price data in bulk, attempt to bypass rate limits, reverse-engineer the backend, or otherwise interfere with the service or API Aberta's API in ways that violate API Aberta's own terms of use." },
+    { h: "No warranty", b: 'The app and its data are provided "as is," without warranties of any kind, express or implied, including accuracy, availability, or fitness for a particular purpose.' },
+    { h: "Limitation of liability", b: `To the maximum extent permitted by law, ${ENTITY_NAME} is not liable for any damages arising from your use of, or inability to use, the app, including reliance on price data that turns out to be inaccurate.` },
+    { h: "Third-party services", b: "The app relies on API Aberta (apiaberta.pt) for fuel price data, Google's Routes API for \"On My Way\" driving directions, and, if you sign in, Apple or Google for authentication. Your use of those services is also subject to their own terms." },
+    { h: "Changes", b: "We may update these terms from time to time. Continued use of the app after changes take effect means you accept the updated terms." },
+    { h: "Contact", b: `Questions about these terms? Contact ${CONTACT_EMAIL}.` },
+  ],
+};
+
+function render(id, sections) {
+  const el = document.getElementById(id);
+  el.innerHTML = sections.map(s => `<h3>${s.h}</h3><p>${s.b}</p>`).join('');
+}
+render('privacy-pt', privacyPolicy.pt);
+render('privacy-en', privacyPolicy.en);
+render('terms-pt', terms.pt);
+render('terms-en', terms.en);
+</script>
+
+</body>
+</html>
