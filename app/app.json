@@ -47,7 +47,7 @@
           "locationWhenInUsePermission": "Tanka uses your location to find nearby fuel stations and compare prices.",
           "locationAlwaysAndWhenInUsePermission": false,
           "locationAlwaysPermission": false,
-          "motionUsagePermission": false
+          "motionUsagePermission": "Tanka does not use your motion data. This text is only here because the location library the app is built with requires it."
         }
       ],
       "expo-secure-store",
