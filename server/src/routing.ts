@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-const ORS_URL = "https://api.openrouteservice.org/v2/directions/driving-car/geojson";
+const ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
 
 export interface RoutePoint {
   lat: number;
@@ -24,13 +24,13 @@ function haversineKm(a: RoutePoint, b: RoutePoint): number {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-// ORS returns thousands of vertices — far more detail than the app needs to
-// draw the line or run corridor math. Resample to roughly one point every
-// `spacingKm` so both the payload and the client-side distance checks stay
-// cheap, while the shape still follows the real road.
-function resample(coords: [number, number][], spacingKm: number): RoutePoint[] {
-  if (coords.length === 0) return [];
-  const points = coords.map(([lng, lat]) => ({ lat, lng }));
+// Google returns a vertex roughly every few metres — far more detail than the
+// app needs to draw the line or run corridor math. Resample to roughly one
+// point every `spacingKm` so both the payload and the client-side distance
+// checks stay cheap, while the shape still hugs the real road closely enough
+// that a station near a bend isn't misjudged as off-route.
+function resample(points: RoutePoint[], spacingKm: number): RoutePoint[] {
+  if (points.length === 0) return [];
   const out: RoutePoint[] = [points[0]];
   let carried = 0;
   for (let i = 1; i < points.length; i++) {
@@ -50,36 +50,58 @@ export async function fetchDrivingRoute(
   from: RoutePoint,
   to: RoutePoint
 ): Promise<RouteResult> {
-  const apiKey = process.env.ORS_API_KEY;
-  if (!apiKey) throw new Error("ORS_API_KEY is not configured");
+  const apiKey = process.env.GOOGLE_ROUTES_API_KEY;
+  if (!apiKey) throw new Error("GOOGLE_ROUTES_API_KEY is not configured");
 
-  const res = await fetch(ORS_URL, {
+  const res = await fetch(ROUTES_URL, {
     method: "POST",
-    headers: { Authorization: apiKey, "Content-Type": "application/json" },
-    body: JSON.stringify({ coordinates: [[from.lng, from.lat], [to.lng, to.lat]] }),
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": apiKey,
+      // Only ask for what we use — Google bills/rate-limits based in part on
+      // response size, and a narrow field mask is required by the API anyway.
+      "X-Goog-FieldMask": "routes.duration,routes.distanceMeters,routes.polyline.geoJsonLinestring",
+    },
+    body: JSON.stringify({
+      origin: { location: { latLng: { latitude: from.lat, longitude: from.lng } } },
+      destination: { location: { latLng: { latitude: to.lat, longitude: to.lng } } },
+      travelMode: "DRIVE",
+      // Keeps this on the free "Essentials" SKU (10k free requests/month).
+      // TRAFFIC_AWARE / TRAFFIC_AWARE_OPTIMAL bill as "Pro" instead.
+      routingPreference: "TRAFFIC_UNAWARE",
+      // GeoJSON coordinates avoid having to decode Google's polyline5 format.
+      polylineEncoding: "GEO_JSON_LINESTRING",
+    }),
   });
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`OpenRouteService ${res.status}: ${text.slice(0, 200)}`);
+    throw new Error(`Google Routes API ${res.status}: ${text.slice(0, 200)}`);
   }
 
   const data = (await res.json()) as {
-    features?: {
-      geometry?: { coordinates?: [number, number][] };
-      properties?: { summary?: { distance?: number; duration?: number } };
+    routes?: {
+      distanceMeters?: number;
+      duration?: string;
+      polyline?: { geoJsonLinestring?: { coordinates?: [number, number][] } };
     }[];
   };
 
-  const feature = data.features?.[0];
-  const coords = feature?.geometry?.coordinates;
+  const route = data.routes?.[0];
+  const coords = route?.polyline?.geoJsonLinestring?.coordinates;
   if (!coords || coords.length < 2) {
-    throw new Error("OpenRouteService returned no route geometry");
+    throw new Error("Google Routes API returned no route geometry");
   }
 
+  // duration comes back as a protobuf Duration string, e.g. "5423s".
+  const durationSeconds = route?.duration ? parseFloat(route.duration.replace("s", "")) : 0;
+
   return {
-    polyline: resample(coords, 1.5),
-    distanceKm: (feature?.properties?.summary?.distance ?? 0) / 1000,
-    durationMin: (feature?.properties?.summary?.duration ?? 0) / 60,
+    polyline: resample(
+      coords.map(([lng, lat]) => ({ lat, lng })),
+      0.4
+    ),
+    distanceKm: (route?.distanceMeters ?? 0) / 1000,
+    durationMin: durationSeconds / 60,
   };
 }
