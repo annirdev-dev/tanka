@@ -1,2 +1,5 @@
 .DS_Store
 node_modules/
+
+# Supabase CLI local link data (machine-specific, not for git)
+supabase/.temp/
