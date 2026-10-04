@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { FUEL_LABELS, FUEL_TYPES, Station } from "../types/station";
 import { radii, spacing, ColorScheme } from "../theme";
@@ -18,7 +18,7 @@ export function AlarmButton({ station }: { station: Station }) {
   const { fuelType } = useStationFilters();
   const defaultFuelType: AlarmFuelType = fuelType === "all" ? FUEL_TYPES[0] : fuelType;
   const { getAlarm, setAlarm, clearAlarm } = useAlarms();
-  const { hasPro, presentPaywall } = usePurchase();
+  const { hasPro, presentPaywall, isSignedIn } = usePurchase();
   const { colors } = useTheme();
   const { t } = useLocale();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -60,13 +60,19 @@ export function AlarmButton({ station }: { station: Station }) {
       </Pressable>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <KeyboardAvoidingView
+          style={styles.avoider}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
         <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
           <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
             <Text style={styles.title}>
               {t("alerts.title", { fuel: FUEL_LABELS[selectedFuel] })}
             </Text>
             <Text style={styles.hint}>
-              {t("alerts.hint", { station: station.brand || station.name })}
+              {t(isSignedIn ? "alerts.hint" : "alerts.hintSignedOut", {
+                station: station.brand || station.name,
+              })}
             </Text>
             <View style={styles.fuelRow}>
               {FUEL_OPTIONS.map((option) => {
@@ -125,6 +131,7 @@ export function AlarmButton({ station }: { station: Station }) {
             </View>
           </Pressable>
         </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );
@@ -133,6 +140,7 @@ export function AlarmButton({ station }: { station: Station }) {
 function createStyles(colors: ColorScheme) {
   return StyleSheet.create({
     trigger: { padding: 6 },
+    avoider: { flex: 1 },
     backdrop: {
       flex: 1,
       backgroundColor: colors.overlay,

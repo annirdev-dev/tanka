@@ -4,6 +4,7 @@ import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
+import { usePurchase } from "../context/PurchaseContext";
 import { useLocale } from "../context/LocaleContext";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabase";
@@ -44,6 +45,7 @@ function getInitials(name: string | null, email: string | null): string {
 
 export function AccountSection({ showHint = true }: { showHint?: boolean } = {}) {
   const { token, user, signOut, deleteAccount } = useAuth();
+  const { clearLocalPurchase } = usePurchase();
   const { t } = useLocale();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -116,11 +118,75 @@ export function AccountSection({ showHint = true }: { showHint?: boolean } = {})
     ]);
   };
 
+  // Asks Apple to confirm it is really the account owner, which gives us the
+  // authorization code needed to remove Apple's link. Returns the code,
+  // undefined if Apple failed for some reason other than the user backing out
+  // (deletion carries on without it), or "cancelled" if the user backed out.
+  const confirmWithApple = async (): Promise<string | undefined | "cancelled"> => {
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    // The confirmation alert that was just tapped is still animating away;
+    // presenting Apple's sheet on top of it can make iOS cancel the request.
+    await wait(600);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const startedAt = Date.now();
+      try {
+        const credential = await AppleAuthentication.signInAsync({ requestedScopes: [] });
+        return credential.authorizationCode ?? undefined;
+      } catch (err) {
+        const canceled = (err as { code?: string }).code === "ERR_REQUEST_CANCELED";
+        if (!canceled) {
+          // Any other Apple hiccup must not leave someone unable to erase their
+          // data — carry on; the backend logs that the link wasn't revoked.
+          console.error("Apple re-authentication failed:", err);
+          return undefined;
+        }
+        // "Cancelled" within a moment of opening is the sheet clashing with the
+        // alert, not the user: try once more before treating it as a real cancel.
+        if (attempt === 0 && Date.now() - startedAt < 1500) {
+          await wait(700);
+          continue;
+        }
+        return "cancelled";
+      }
+    }
+    return "cancelled";
+  };
+
   const confirmDeleteAccount = () => {
-    Alert.alert(t("account.deleteAccountConfirmTitle"), t("account.deleteAccountConfirmMsg"), [
-      { text: t("common.cancel"), style: "cancel" },
-      { text: t("account.delete"), style: "destructive", onPress: () => deleteAccount() },
-    ]);
+    const usesApple = !!user?.providers.includes("apple");
+    Alert.alert(
+      t("account.deleteAccountConfirmTitle"),
+      t(usesApple ? "account.deleteAccountConfirmMsgApple" : "account.deleteAccountConfirmMsg"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("account.delete"),
+          style: "destructive",
+          onPress: async () => {
+            // Accounts created with Apple must be confirmed with Apple again, so
+            // we get a fresh authorization code to revoke Apple's link with.
+            let appleCode: string | undefined;
+            if (usesApple) {
+              const result = await confirmWithApple();
+              if (result === "cancelled") {
+                Alert.alert(t("account.deleteAppleCancelledTitle"), t("account.deleteAppleCancelledMsg"));
+                return;
+              }
+              appleCode = result;
+            }
+            try {
+              await deleteAccount(appleCode);
+              // The account and its Pro record are gone — drop this device's local
+              // Pro note too so the app starts over (the Apple ID still owns the
+              // purchase, so Restore/Unlock brings Pro back without paying again).
+              clearLocalPurchase();
+            } catch {
+              Alert.alert(t("account.deleteFailedTitle"), t("account.deleteFailedMsg"));
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (token && user) {
@@ -128,8 +194,10 @@ export function AccountSection({ showHint = true }: { showHint?: boolean } = {})
     return (
       <View style={styles.body}>
         <View style={styles.profileRow}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{getInitials(user.name, user.email)}</Text>
+          <View style={styles.avatarRing}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{getInitials(user.name, user.email)}</Text>
+            </View>
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileName} numberOfLines={1}>
@@ -161,22 +229,36 @@ export function AccountSection({ showHint = true }: { showHint?: boolean } = {})
 
   return (
     <View style={styles.body}>
-      {showHint && <Text style={styles.hint}>{t("account.syncHint")}</Text>}
+      {showHint && (
+        <View style={styles.hintRow}>
+          <View style={styles.hintBadge}>
+            <Ionicons name="sync-outline" size={16} color={colors.accent} />
+          </View>
+          <Text style={styles.hint}>{t("account.syncHint")}</Text>
+        </View>
+      )}
       {busy ? (
-        <ActivityIndicator style={{ marginTop: spacing.md }} />
+        <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.accent} />
       ) : (
-        <>
+        <View style={styles.buttonStack}>
           {Platform.OS === "ios" && (
-            <Pressable style={styles.appleButton} onPress={handleApple}>
-              <Ionicons name="logo-apple" size={18} color="#fff" />
-              <Text style={styles.appleButtonText}>{t("account.signInApple")}</Text>
-            </Pressable>
+            <>
+              <Pressable style={styles.appleButton} onPress={handleApple}>
+                <Ionicons name="logo-apple" size={18} color="#fff" />
+                <Text style={styles.appleButtonText}>{t("account.signInApple")}</Text>
+              </Pressable>
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>{t("pro.or")}</Text>
+                <View style={styles.dividerLine} />
+              </View>
+            </>
           )}
           <Pressable style={styles.googleButton} onPress={handleGoogle}>
             <Ionicons name="logo-google" size={18} color={colors.textPrimary} />
             <Text style={styles.googleButtonText}>{t("account.signInGoogle")}</Text>
           </Pressable>
-        </>
+        </View>
       )}
     </View>
   );
@@ -184,40 +266,62 @@ export function AccountSection({ showHint = true }: { showHint?: boolean } = {})
 
 function createStyles(colors: ColorScheme) {
   return StyleSheet.create({
-    body: { padding: spacing.lg, gap: spacing.sm },
-    hint: { fontSize: 12, color: colors.textMuted, lineHeight: 16, marginBottom: spacing.xs },
+    body: { padding: spacing.lg, gap: spacing.md },
+    hintRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.xs },
+    hintBadge: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.accentMuted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    hint: { flex: 1, fontSize: 12, color: colors.textMuted, lineHeight: 16 },
+    buttonStack: { gap: spacing.sm },
     appleButton: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
       gap: spacing.sm,
       backgroundColor: "#000",
-      borderRadius: radii.sm,
-      paddingVertical: spacing.sm + 2,
+      borderRadius: radii.pill,
+      paddingVertical: spacing.sm + 4,
     },
     appleButtonText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+    dividerRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginVertical: 2 },
+    dividerLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border },
+    dividerText: { fontSize: 11, color: colors.textMuted, fontWeight: "600", textTransform: "uppercase" },
     googleButton: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
       gap: spacing.sm,
       backgroundColor: colors.background,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: radii.sm,
-      paddingVertical: spacing.sm + 2,
+      borderWidth: 1.5,
+      borderColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingVertical: spacing.sm + 4,
     },
     googleButtonText: { color: colors.textPrimary, fontWeight: "700", fontSize: 14 },
     profileRow: { flexDirection: "row", alignItems: "center", gap: spacing.md },
-    avatar: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: colors.accent,
+    avatarRing: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      borderWidth: 2,
+      borderColor: colors.accent,
       alignItems: "center",
       justifyContent: "center",
     },
-    avatarText: { color: colors.accentOn, fontWeight: "700", fontSize: 16 },
+    avatar: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: colors.accentMuted,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    avatarText: { color: colors.accent, fontWeight: "700", fontSize: 15 },
     profileInfo: { flex: 1, minWidth: 0 },
     profileName: { fontSize: 15, fontWeight: "700", color: colors.textPrimary },
     profileEmail: { fontSize: 12, color: colors.textMuted, marginTop: 1 },

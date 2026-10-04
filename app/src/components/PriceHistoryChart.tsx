@@ -6,16 +6,21 @@ import { FuelType, HistoryPoint, HistoryRange } from "../types/station";
 import { radii, spacing, ColorScheme } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { useLocale } from "../context/LocaleContext";
+import { DelayedPriceBanner } from "./DelayedPriceBanner";
 
-const RANGES: HistoryRange[] = ["12h", "24h", "3d", "1w"];
+const RANGES: HistoryRange[] = ["24h", "3d", "1w"];
 
 const CHART_HEIGHT = 100;
 const CHART_WIDTH = 300;
 const PADDING = 10;
 
 export function PriceHistoryChart({ stationId, fuelType }: { stationId: string; fuelType: FuelType }) {
-  const [range, setRange] = useState<HistoryRange>("24h");
+  // "24h" as a default would show "no data" almost always — DGEG doesn't
+  // update every station's price every single day, so a wider default window
+  // is far more likely to actually have something to chart.
+  const [range, setRange] = useState<HistoryRange>("1w");
   const [history, setHistory] = useState<HistoryPoint[]>([]);
+  const [pricesAsOf, setPricesAsOf] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { colors } = useTheme();
   const { t } = useLocale();
@@ -26,10 +31,16 @@ export function PriceHistoryChart({ stationId, fuelType }: { stationId: string; 
     setLoading(true);
     fetchStationHistory(stationId, range)
       .then((data) => {
-        if (!cancelled) setHistory(data);
+        if (!cancelled) {
+          setHistory(data.history);
+          setPricesAsOf(data.pricesAsOf);
+        }
       })
       .catch(() => {
-        if (!cancelled) setHistory([]);
+        if (!cancelled) {
+          setHistory([]);
+          setPricesAsOf(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -83,6 +94,12 @@ export function PriceHistoryChart({ stationId, fuelType }: { stationId: string; 
         </View>
       </View>
 
+      {pricesAsOf && (
+        <View style={styles.delayedBannerWrap}>
+          <DelayedPriceBanner pricesAsOf={pricesAsOf} />
+        </View>
+      )}
+
       {loading ? (
         <View style={styles.emptyChart}>
           <ActivityIndicator size="small" />
@@ -134,6 +151,7 @@ function createStyles(colors: ColorScheme) {
       padding: spacing.md,
     },
     header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: spacing.sm },
+    delayedBannerWrap: { marginBottom: spacing.sm },
     title: { fontSize: 14, fontWeight: "700", color: colors.textPrimary },
     rangeRow: { flexDirection: "row", gap: 6 },
     rangePill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: radii.pill, backgroundColor: colors.pillInactive },

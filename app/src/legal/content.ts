@@ -13,18 +13,18 @@ export interface LegalDoc {
 const CONTACT_EMAIL = "annirdev@gmail.com";
 const ENTITY_NAME = "Annir Dev";
 
-export const privacyPolicy: { de: LegalDoc; en: LegalDoc } = {
+export const privacyPolicy: { pt: LegalDoc; en: LegalDoc } = {
   en: {
     title: "Privacy Policy",
-    updated: "Last updated: 2026",
+    updated: "Last updated: October 2026",
     sections: [
       {
         heading: "Overview",
-        body: `Tanken ("the app") helps you find and compare fuel prices at gas stations in Germany. This policy explains what data the app collects, why, and how it's handled. The app is operated by ${ENTITY_NAME}.`,
+        body: `Tanka ("the app") helps you find and compare fuel prices at gas stations in Portugal. This policy explains what data the app collects, why, and how it's handled. The app is operated by ${ENTITY_NAME}.`,
       },
       {
         heading: "Location data",
-        body: "The app requests your device location to find fuel stations near you. Your coordinates are sent to our backend server only to query the Tankerkönig API for nearby stations — they are not stored, logged, or shared with anyone beyond that single request. You can deny or revoke location access at any time in your device Settings; the app will not function without it.",
+        body: "The app uses your device location to show fuel stations near you. Your coordinates are sent to our backend (hosted by Supabase in the EU) only to find nearby stations in our own price database; we don't store them with your account or share them with anyone. Our hosting provider may keep routine technical request logs for a limited time. If you use \"On My Way\" to search along a route, your start and destination coordinates are also sent to Google's Routes API to calculate the driving route; routes are cached for up to a day without your name or account. If you decline location access, or you are outside Portugal, the app shows stations in Lisbon instead. You can change location access at any time in your device Settings.",
       },
       {
         heading: "Data stored on your device",
@@ -32,19 +32,27 @@ export const privacyPolicy: { de: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Account & sync (optional)",
-        body: "If you choose to sign in with Apple or Google, we receive your name and email address (or a private relay address, if you use Apple's \"Hide My Email\") from that provider, solely to identify your account. Your account, favorites, and price alerts are then stored with Supabase, our backend infrastructure provider (authentication and database hosting), so you can access them on multiple devices. Supabase processes this data only on our behalf and does not use it for its own purposes. We never receive or store your Apple or Google password. You can delete your account and all synced data at any time from Settings.",
+        body: "If you choose to sign in with Apple or Google, we receive your name and email address (or a private relay address, if you use Apple's \"Hide My Email\") from that provider, solely to identify your account. We then store the following with Supabase, our backend infrastructure provider (authentication and database hosting): your account, your favorites and price alerts, your notification token, the start date of your free trial, and whether Tanka Pro is active on your account. Supabase processes this data only on our behalf and does not use it for its own purposes. We never receive or store your Apple or Google password. You can delete your account and all synced data at any time from Settings; deleting it also removes the link between Tanka and your Apple ID.",
       },
       {
-        heading: "Price data",
-        body: "Fuel prices are provided by Tankerkönig (creativecommons.tankerkoenig.de), based on data from the Markttransparenzstelle für Kraftstoffe (MTS-K). We temporarily cache price responses on our server to reduce load on Tankerkönig's API, and keep a short price-history log per station (price and timestamp only, not linked to you) to power the in-app price chart.",
+        heading: "Purchases and free trial",
+        body: "Tanka Pro is a one-time in-app purchase handled entirely by Apple — we never see your payment details. To unlock Pro on your account, our server asks Apple to confirm your purchase (it sends Apple the purchase's transaction ID) and stores that Pro is active together with that ID. If Apple tells us the purchase was refunded, Pro is switched off for it. Signed-in accounts get a free 5-day trial of the Pro features.",
+      },
+      {
+        heading: "Keeping the free trial fair",
+        body: "To stop the free trial being repeated by deleting and re-creating an account, when you delete your account we keep a one-way code (a hash) derived from your Apple or Google sign-in identifier, together with your trial start date. It cannot be used to identify or contact you, and it is used only to prevent this kind of abuse (our legitimate interest).",
       },
       {
         heading: "Notifications",
-        body: "Price alerts are delivered as local notifications generated on your own device while the app is open. We do not use a push notification service and cannot see or access the content of these notifications.",
+        body: "If you set a price alert, we store a device push token (via the Expo push notification service) so we can check prices periodically on our server and notify you even while the app is closed. We can't see or read the content of push notifications sent to other apps, and this token is only ever used to deliver your own price alerts.",
+      },
+      {
+        heading: "How long we keep data",
+        body: "Account data is kept until you delete your account. Notification tokens are removed when they stop working. Routine hosting logs are kept by our providers for a limited time. The one-way trial code described above is kept so the free trial can't be repeated.",
       },
       {
         heading: "What we don't do",
-        body: "We don't show ads, use analytics or tracking SDKs, or sell or share your data with advertisers or data brokers. The only third parties involved are Tankerkönig (fuel price data), Supabase (backend infrastructure for account and data storage), and Apple/Google (only if you choose to sign in).",
+        body: "We don't show ads, use analytics or tracking SDKs, or sell or share your data with advertisers or data brokers. The only third parties involved are: API Aberta (fuel price data — no personal data is sent to it); Google (Routes API for \"On My Way\", and Sign in with Google if you choose it); Apple (Sign in with Apple, purchases and Apple Maps); Supabase (backend hosting for accounts and data, in the EU); and Expo (delivering push notifications and app updates).",
       },
       {
         heading: "Your rights",
@@ -60,74 +68,86 @@ export const privacyPolicy: { de: LegalDoc; en: LegalDoc } = {
       },
     ],
   },
-  de: {
-    title: "Datenschutzerklärung",
-    updated: "Zuletzt aktualisiert: 2026",
+  pt: {
+    title: "Política de Privacidade",
+    updated: "Última atualização: outubro de 2026",
     sections: [
       {
-        heading: "Überblick",
-        body: `Tanken („die App") hilft dir, Kraftstoffpreise an Tankstellen in Deutschland zu finden und zu vergleichen. Diese Erklärung beschreibt, welche Daten die App erhebt, warum, und wie sie verarbeitet werden. Betreiber der App ist ${ENTITY_NAME}.`,
+        heading: "Visão geral",
+        body: `O Tanka („a app") ajuda-te a encontrar e comparar preços de combustível em postos de abastecimento em Portugal. Esta política explica que dados a app recolhe, porquê, e como são tratados. A app é operada por ${ENTITY_NAME}.`,
       },
       {
-        heading: "Standortdaten",
-        body: "Die App fragt deinen Gerätestandort ab, um Tankstellen in deiner Nähe zu finden. Deine Koordinaten werden nur an unseren Backend-Server gesendet, um die Tankerkönig-API nach nahegelegenen Tankstellen abzufragen — sie werden nicht gespeichert, protokolliert oder über diese eine Anfrage hinaus weitergegeben. Du kannst den Standortzugriff jederzeit in den Geräteeinstellungen verweigern oder widerrufen; die App funktioniert dann jedoch nicht.",
+        heading: "Dados de localização",
+        body: "A app usa a localização do teu dispositivo para mostrar os postos perto de ti. As tuas coordenadas são enviadas para o nosso backend (alojado na Supabase, na UE) apenas para encontrar postos próximos na nossa própria base de preços; não as guardamos associadas à tua conta nem as partilhamos com ninguém. O nosso fornecedor de alojamento pode manter registos técnicos de pedidos durante um período limitado. Se usares „A caminho\" para pesquisar ao longo de uma rota, as coordenadas de partida e destino são também enviadas para a API Routes da Google para calcular o trajeto; os trajetos ficam em cache até um dia, sem o teu nome nem conta. Se recusares o acesso à localização, ou estiveres fora de Portugal, a app mostra os postos de Lisboa. Podes alterar o acesso à localização a qualquer momento nas definições do teu dispositivo.",
       },
       {
-        heading: "Auf deinem Gerät gespeicherte Daten",
-        body: "Deine favorisierten Tankstellen, Preisalarme und App-Einstellungen (Kraftstoffart, Design, Sprache) werden lokal auf deinem Gerät gespeichert. Diese Daten werden nirgendwohin gesendet, es sei denn, du meldest dich an (siehe unten).",
+        heading: "Dados guardados no teu dispositivo",
+        body: "Os teus postos favoritos, alertas de preço e preferências da app (tipo de combustível, tema, idioma) são guardados localmente no teu dispositivo. Estes dados não são enviados para lado nenhum, a menos que optes por iniciar sessão (ver abaixo).",
       },
       {
-        heading: "Konto & Synchronisierung (optional)",
-        body: "Wenn du dich mit Apple oder Google anmeldest, erhalten wir deinen Namen und deine E-Mail-Adresse (oder eine private Weiterleitungsadresse, falls du Apples „E-Mail geheim halten\" nutzt) von diesem Anbieter, ausschließlich zur Identifizierung deines Kontos. Dein Konto sowie deine Favoriten und Preisalarme werden bei Supabase gespeichert, unserem Backend-Infrastrukturanbieter für Authentifizierung und Datenbank, damit du auf mehreren Geräten darauf zugreifen kannst. Supabase verarbeitet diese Daten ausschließlich in unserem Auftrag und nutzt sie nicht für eigene Zwecke. Wir erhalten oder speichern niemals dein Apple- oder Google-Passwort. Du kannst dein Konto und alle synchronisierten Daten jederzeit in den Einstellungen löschen.",
+        heading: "Conta e sincronização (opcional)",
+        body: "Se optares por iniciar sessão com a Apple ou a Google, recebemos o teu nome e endereço de email (ou um endereço de reencaminhamento privado, caso uses o „Ocultar o Meu Email\" da Apple) desse fornecedor, exclusivamente para identificar a tua conta. Guardamos depois na Supabase, o nosso fornecedor de infraestrutura de backend (autenticação e alojamento de base de dados): a tua conta, os teus favoritos e alertas de preço, o teu token de notificações, a data de início do teu período experimental e se o Tanka Pro está ativo na tua conta. A Supabase processa estes dados apenas em nosso nome e não os utiliza para fins próprios. Nunca recebemos nem armazenamos a tua palavra-passe da Apple ou da Google. Podes eliminar a tua conta e todos os dados sincronizados a qualquer momento a partir das Definições; ao eliminá-la, removemos também a ligação entre o Tanka e o teu ID Apple.",
       },
       {
-        heading: "Preisdaten",
-        body: "Kraftstoffpreise werden von Tankerkönig (creativecommons.tankerkoenig.de) bereitgestellt, basierend auf Daten der Markttransparenzstelle für Kraftstoffe (MTS-K). Wir zwischenspeichern Preisantworten vorübergehend auf unserem Server, um die Tankerkönig-API zu entlasten, und führen ein kurzes Preisverlaufs-Protokoll je Tankstelle (nur Preis und Zeitstempel, nicht mit dir verknüpft) für das Preisdiagramm in der App.",
+        heading: "Compras e período experimental",
+        body: "O Tanka Pro é uma compra única na app, tratada inteiramente pela Apple — nunca vemos os teus dados de pagamento. Para desbloquear o Pro na tua conta, o nosso servidor pede à Apple que confirme a tua compra (envia à Apple o ID da transação) e guarda que o Pro está ativo, juntamente com esse ID. Se a Apple nos informar que a compra foi reembolsada, o Pro é desativado. As contas com sessão iniciada têm um período experimental gratuito de 5 dias das funcionalidades Pro.",
       },
       {
-        heading: "Benachrichtigungen",
-        body: "Preisalarme werden als lokale Benachrichtigungen auf deinem eigenen Gerät erzeugt, solange die App geöffnet ist. Wir nutzen keinen Push-Benachrichtigungsdienst und können den Inhalt dieser Benachrichtigungen nicht einsehen.",
+        heading: "Manter o período experimental justo",
+        body: "Para evitar que o período experimental seja repetido eliminando e recriando uma conta, quando eliminas a tua conta guardamos um código irreversível (um hash) derivado do identificador do teu início de sessão com a Apple ou a Google, juntamente com a data de início do período experimental. Esse código não permite identificar-te nem contactar-te e só é usado para evitar este tipo de abuso (o nosso interesse legítimo).",
       },
       {
-        heading: "Was wir nicht tun",
-        body: "Wir zeigen keine Werbung, nutzen keine Analyse- oder Tracking-SDKs und verkaufen oder teilen deine Daten nicht mit Werbetreibenden oder Datenhändlern. Die einzigen beteiligten Dritten sind Tankerkönig (Kraftstoffpreisdaten), Supabase (Backend-Infrastruktur für Konto und Datenspeicherung) und Apple/Google (nur wenn du dich anmeldest).",
+        heading: "Notificações",
+        body: "Se configurares um alerta de preço, guardamos um token de notificações push do dispositivo (através do serviço de notificações push da Expo) para podermos verificar os preços periodicamente no nosso servidor e notificar-te mesmo com a app fechada. Não conseguimos ver nem aceder ao conteúdo de notificações push enviadas para outras apps, e este token só é usado para entregar os teus próprios alertas de preço.",
       },
       {
-        heading: "Deine Rechte",
-        body: "Du kannst deine Favoriten und Preisalarme jederzeit in den Einstellungen löschen. Falls du ein Konto hast, kannst du die Löschung deines Kontos und aller zugehörigen Daten in den Einstellungen oder durch Kontaktaufnahme beantragen. In der EU/EWR hast du gemäß DSGVO Rechte auf Auskunft, Berichtigung und Löschung deiner Daten.",
+        heading: "Durante quanto tempo guardamos os dados",
+        body: "Os dados da conta são guardados até eliminares a tua conta. Os tokens de notificações são removidos quando deixam de funcionar. Os registos técnicos de alojamento são mantidos pelos nossos fornecedores durante um período limitado. O código irreversível do período experimental, descrito acima, é guardado para que o período experimental não possa ser repetido.",
       },
       {
-        heading: "Änderungen dieser Erklärung",
-        body: "Wir können diese Erklärung von Zeit zu Zeit aktualisieren. Wesentliche Änderungen werden durch Aktualisierung des Datums oben kenntlich gemacht.",
+        heading: "O que não fazemos",
+        body: "Não mostramos anúncios, não usamos SDKs de análise ou rastreio, nem vendemos ou partilhamos os teus dados com anunciantes ou corretores de dados. Os únicos terceiros envolvidos são: a API Aberta (dados de preços de combustível — não lhe é enviado qualquer dado pessoal); a Google (API Routes para „A caminho\", e início de sessão com a Google se o escolheres); a Apple (início de sessão com a Apple, compras e Apple Maps); a Supabase (alojamento do backend para contas e dados, na UE); e a Expo (entrega de notificações push e atualizações da app).",
       },
       {
-        heading: "Kontakt",
-        body: `Fragen zu dieser Erklärung? Kontaktiere ${CONTACT_EMAIL}.`,
+        heading: "Os teus direitos",
+        body: "Podes limpar os teus favoritos e alertas de preço a qualquer momento a partir das Definições. Se tiveres uma conta, podes pedir a eliminação da tua conta e de todos os dados associados a partir das Definições, ou contactando-nos. Se estiveres na UE/EEE, tens direitos ao abrigo do RGPD, incluindo acesso, retificação e eliminação dos teus dados.",
+      },
+      {
+        heading: "Alterações a esta política",
+        body: "Podemos atualizar esta política periodicamente. Alterações relevantes serão refletidas atualizando a data acima.",
+      },
+      {
+        heading: "Contacto",
+        body: `Tens dúvidas sobre esta política? Contacta ${CONTACT_EMAIL}.`,
       },
     ],
   },
 };
 
-export const terms: { de: LegalDoc; en: LegalDoc } = {
+export const terms: { pt: LegalDoc; en: LegalDoc } = {
   en: {
     title: "Terms of Use",
-    updated: "Last updated: 2026",
+    updated: "Last updated: October 2026",
     sections: [
       {
         heading: "Acceptance",
-        body: `By using Tanken ("the app"), you agree to these terms. If you don't agree, please don't use the app. The app is operated by ${ENTITY_NAME}.`,
+        body: `By using Tanka ("the app"), you agree to these terms. If you don't agree, please don't use the app. The app is operated by ${ENTITY_NAME}.`,
       },
       {
         heading: "What the app is",
-        body: "Tanken shows fuel prices at gas stations in Germany, sourced from the Tankerkönig API, for informational purposes. Prices are reported by stations in near real-time but may occasionally be delayed, missing, or inaccurate. Always confirm the price at the pump before fueling — the app is not a substitute for that.",
+        body: "Tanka shows fuel prices at gas stations in Portugal, sourced from the API Aberta service, for informational purposes. Prices are reported near real-time but may occasionally be delayed, missing, or inaccurate. Always confirm the price at the pump before fueling — the app is not a substitute for that.",
       },
       {
         heading: "Accounts",
         body: "If you sign in, you're responsible for keeping your account secure and for all activity under it. You may request deletion of your account at any time. We may suspend or terminate accounts that abuse the service.",
       },
       {
+        heading: "Tanka Pro and free trial",
+        body: "Tanka Pro is a one-time purchase made through the App Store and is tied to your Apple ID and, when you are signed in, to your account. Payment, receipts and refunds are handled by Apple under its own terms; if a purchase is refunded, Pro is switched off. Signed-in accounts get a free 5-day trial, once per person. Features and prices may change for future purchases.",
+      },
+      {
         heading: "Acceptable use",
-        body: "Don't use the app to scrape, resell, or redistribute the underlying price data in bulk, attempt to bypass rate limits, reverse-engineer the backend, or otherwise interfere with the service or Tankerkönig's API in ways that violate Tankerkönig's own terms of use.",
+        body: "Don't use the app to scrape, resell, or redistribute the underlying price data in bulk, attempt to bypass rate limits, reverse-engineer the backend, or otherwise interfere with the service or API Aberta's API in ways that violate API Aberta's own terms of use.",
       },
       {
         heading: "No warranty",
@@ -139,7 +159,7 @@ export const terms: { de: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Third-party services",
-        body: "The app relies on Tankerkönig (fuel price data, licensed under CC BY 4.0) and, if you sign in, Apple or Google for authentication. Your use of those services is also subject to their own terms.",
+        body: "The app relies on API Aberta (apiaberta.pt) for fuel price data, Google's Routes API for \"On My Way\" driving directions, Supabase for backend hosting, Expo for notifications and app updates, and Apple (purchases, maps and, if you sign in, authentication) or Google (if you sign in with Google). Your use of those services is also subject to their own terms.",
       },
       {
         heading: "Changes",
@@ -151,62 +171,66 @@ export const terms: { de: LegalDoc; en: LegalDoc } = {
       },
     ],
   },
-  de: {
-    title: "Nutzungsbedingungen",
-    updated: "Zuletzt aktualisiert: 2026",
+  pt: {
+    title: "Termos de Utilização",
+    updated: "Última atualização: outubro de 2026",
     sections: [
       {
-        heading: "Annahme der Bedingungen",
-        body: `Durch die Nutzung von Tanken („die App") erklärst du dich mit diesen Bedingungen einverstanden. Wenn du nicht einverstanden bist, nutze die App bitte nicht. Betreiber der App ist ${ENTITY_NAME}.`,
+        heading: "Aceitação",
+        body: `Ao usares o Tanka („a app"), aceitas estes termos. Se não concordares, por favor não uses a app. A app é operada por ${ENTITY_NAME}.`,
       },
       {
-        heading: "Was die App ist",
-        body: "Tanken zeigt Kraftstoffpreise an Tankstellen in Deutschland an, bezogen von der Tankerkönig-API, zu Informationszwecken. Preise werden von den Tankstellen nahezu in Echtzeit gemeldet, können aber gelegentlich verzögert, fehlend oder ungenau sein. Bestätige den Preis immer an der Zapfsäule, bevor du tankst — die App ersetzt das nicht.",
+        heading: "O que é a app",
+        body: "O Tanka mostra preços de combustível em postos de abastecimento em Portugal, obtidos a partir do serviço API Aberta, para fins informativos. Os preços são reportados quase em tempo real, mas podem ocasionalmente estar atrasados, em falta ou incorretos. Confirma sempre o preço na bomba antes de abastecer — a app não substitui essa verificação.",
       },
       {
-        heading: "Konten",
-        body: "Wenn du dich anmeldest, bist du für die Sicherheit deines Kontos und alle darüber ausgeführten Aktivitäten verantwortlich. Du kannst jederzeit die Löschung deines Kontos beantragen. Wir können Konten sperren oder löschen, die den Dienst missbrauchen.",
+        heading: "Contas",
+        body: "Se iniciares sessão, és responsável por manter a tua conta segura e por toda a atividade realizada através dela. Podes pedir a eliminação da tua conta a qualquer momento. Podemos suspender ou encerrar contas que abusem do serviço.",
       },
       {
-        heading: "Zulässige Nutzung",
-        body: "Nutze die App nicht, um die zugrunde liegenden Preisdaten massenhaft abzugreifen, weiterzuverkaufen oder weiterzuverbreiten, Ratenbegrenzungen zu umgehen, das Backend zurückzuentwickeln oder den Dienst bzw. die Tankerkönig-API auf eine Weise zu stören, die gegen Tankerkönigs eigene Nutzungsbedingungen verstößt.",
+        heading: "Tanka Pro e período experimental",
+        body: "O Tanka Pro é uma compra única feita através da App Store, associada ao teu ID Apple e, quando tens sessão iniciada, à tua conta. O pagamento, os recibos e os reembolsos são tratados pela Apple, ao abrigo dos seus próprios termos; se uma compra for reembolsada, o Pro é desativado. As contas com sessão iniciada têm um período experimental gratuito de 5 dias, uma vez por pessoa. As funcionalidades e os preços podem mudar para compras futuras.",
       },
       {
-        heading: "Keine Gewährleistung",
-        body: "Die App und ihre Daten werden „wie besehen\" bereitgestellt, ohne Gewährleistung jeglicher Art, weder ausdrücklich noch stillschweigend, einschließlich Genauigkeit, Verfügbarkeit oder Eignung für einen bestimmten Zweck.",
+        heading: "Utilização aceitável",
+        body: "Não uses a app para extrair, revender ou redistribuir em massa os dados de preços subjacentes, tentar contornar limites de utilização, fazer engenharia inversa do backend, ou de outra forma interferir com o serviço ou com a API da API Aberta de formas que violem os próprios termos de utilização da API Aberta.",
       },
       {
-        heading: "Haftungsbeschränkung",
-        body: `Soweit gesetzlich zulässig, haftet ${ENTITY_NAME} nicht für Schäden, die aus der Nutzung oder Nichtnutzbarkeit der App entstehen, einschließlich des Vertrauens auf sich als ungenau herausstellende Preisdaten.`,
+        heading: "Sem garantias",
+        body: "A app e os seus dados são fornecidos „tal como estão\", sem garantias de qualquer tipo, expressas ou implícitas, incluindo precisão, disponibilidade ou adequação a um fim específico.",
       },
       {
-        heading: "Drittanbieterdienste",
-        body: "Die App nutzt Tankerkönig (Kraftstoffpreisdaten, lizenziert unter CC BY 4.0) und, falls du dich anmeldest, Apple oder Google zur Authentifizierung. Deine Nutzung dieser Dienste unterliegt auch deren eigenen Bedingungen.",
+        heading: "Limitação de responsabilidade",
+        body: `Na máxima medida permitida por lei, ${ENTITY_NAME} não é responsável por quaisquer danos resultantes do teu uso, ou incapacidade de usar, a app, incluindo confiar em dados de preços que se revelem incorretos.`,
       },
       {
-        heading: "Änderungen",
-        body: "Wir können diese Bedingungen von Zeit zu Zeit aktualisieren. Die fortgesetzte Nutzung der App nach Inkrafttreten von Änderungen bedeutet, dass du die aktualisierten Bedingungen akzeptierst.",
+        heading: "Serviços de terceiros",
+        body: "A app depende da API Aberta (apiaberta.pt) para os dados de preços de combustível, da API Routes da Google para os trajetos de „A caminho\", da Supabase para o alojamento do backend, da Expo para notificações e atualizações da app, e da Apple (compras, mapas e, se iniciares sessão, autenticação) ou da Google (se iniciares sessão com a Google). A tua utilização desses serviços está também sujeita aos respetivos termos próprios.",
       },
       {
-        heading: "Kontakt",
-        body: `Fragen zu diesen Bedingungen? Kontaktiere ${CONTACT_EMAIL}.`,
+        heading: "Alterações",
+        body: "Podemos atualizar estes termos periodicamente. A utilização continuada da app após as alterações entrarem em vigor significa que aceitas os termos atualizados.",
+      },
+      {
+        heading: "Contacto",
+        body: `Tens dúvidas sobre estes termos? Contacta ${CONTACT_EMAIL}.`,
       },
     ],
   },
 };
 
-export const licenses: { de: LegalDoc; en: LegalDoc } = {
+export const licenses: { pt: LegalDoc; en: LegalDoc } = {
   en: {
     title: "Licenses & Attribution",
     updated: "",
     sections: [
       {
         heading: "Fuel price data",
-        body: "Provided by Tankerkönig (creativecommons.tankerkoenig.de), based on data from the Markttransparenzstelle für Kraftstoffe (MTS-K) / Bundeskartellamt. Licensed under Creative Commons Attribution 4.0 (CC BY 4.0). See creativecommons.org/licenses/by/4.0.",
+        body: "Provided by API Aberta (apiaberta.pt), an open-source initiative that aggregates Portuguese public-sector data; fuel prices are updated daily from Direção-Geral de Energia e Geologia (DGEG) sources.",
       },
       {
         heading: "Open-source software",
-        body: "This app is built with React Native, Expo, and the following open-source packages, most under the MIT License: react-navigation, react-native-maps, react-native-svg, @react-native-async-storage/async-storage, @supabase/supabase-js, expo-location, expo-notifications, expo-apple-authentication, @react-native-google-signin/google-signin, expo-secure-store, @expo/vector-icons, and their dependencies. Full license texts are included in each package's repository.",
+        body: "This app is built with React Native, Expo, and the following open-source packages, most under the MIT License: react-navigation, react-native-maps, react-native-svg, @react-native-async-storage/async-storage, @supabase/supabase-js, expo-location, expo-notifications, expo-apple-authentication, @react-native-google-signin/google-signin, expo-secure-store, expo-iap, expo-store-review, @expo/vector-icons, and their dependencies. Full license texts are included in each package's repository.",
       },
       {
         heading: "Maps",
@@ -214,21 +238,21 @@ export const licenses: { de: LegalDoc; en: LegalDoc } = {
       },
     ],
   },
-  de: {
-    title: "Lizenzen & Namensnennung",
+  pt: {
+    title: "Licenças e Créditos",
     updated: "",
     sections: [
       {
-        heading: "Kraftstoffpreisdaten",
-        body: "Bereitgestellt von Tankerkönig (creativecommons.tankerkoenig.de), basierend auf Daten der Markttransparenzstelle für Kraftstoffe (MTS-K) / des Bundeskartellamts. Lizenziert unter Creative Commons Namensnennung 4.0 (CC BY 4.0). Siehe creativecommons.org/licenses/by/4.0/deed.de.",
+        heading: "Dados de preços de combustível",
+        body: "Fornecidos pela API Aberta (apiaberta.pt), uma iniciativa open-source que agrega dados públicos portugueses; os preços de combustível são atualizados diariamente com base em fontes da Direção-Geral de Energia e Geologia (DGEG).",
       },
       {
-        heading: "Open-Source-Software",
-        body: "Diese App wurde mit React Native, Expo und den folgenden Open-Source-Paketen erstellt, größtenteils unter der MIT-Lizenz: react-navigation, react-native-maps, react-native-svg, @react-native-async-storage/async-storage, @supabase/supabase-js, expo-location, expo-notifications, expo-apple-authentication, @react-native-google-signin/google-signin, expo-secure-store, @expo/vector-icons und deren Abhängigkeiten. Vollständige Lizenztexte sind im jeweiligen Paket-Repository enthalten.",
+        heading: "Software open-source",
+        body: "Esta app foi construída com React Native, Expo e os seguintes pacotes open-source, na sua maioria sob a Licença MIT: react-navigation, react-native-maps, react-native-svg, @react-native-async-storage/async-storage, @supabase/supabase-js, expo-location, expo-notifications, expo-apple-authentication, @react-native-google-signin/google-signin, expo-secure-store, expo-iap, expo-store-review, @expo/vector-icons e as suas dependências. Os textos de licença completos estão incluídos no repositório de cada pacote.",
       },
       {
-        heading: "Karten",
-        body: "Kartenkacheln und -daten werden von Apple Maps (iOS) bzw. Google Maps (Android) bereitgestellt und unterliegen deren jeweiligen Nutzungsbedingungen.",
+        heading: "Mapas",
+        body: "Os mapas e dados cartográficos são fornecidos pela Apple Maps (iOS) ou Google Maps (Android), sujeitos aos respetivos termos de serviço.",
       },
     ],
   },

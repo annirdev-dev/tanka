@@ -44,7 +44,10 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Tanka uses your location to find nearby fuel stations and compare prices."
+          "locationWhenInUsePermission": "Tanka uses your location to find nearby fuel stations and compare prices.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "motionUsagePermission": false
         }
       ],
       "expo-secure-store",
@@ -63,6 +66,12 @@
       "eas": {
         "projectId": "da8d3201-46a7-4518-a374-25712a27f6fd"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/da8d3201-46a7-4518-a374-25712a27f6fd"
     }
   }
 }

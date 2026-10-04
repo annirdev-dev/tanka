@@ -12,6 +12,7 @@ import { TrendArrow } from "../components/TrendArrow";
 import { FavoriteButton } from "../components/FavoriteButton";
 import { PriceHistoryChart } from "../components/PriceHistoryChart";
 import { AlarmButton } from "../components/AlarmButton";
+import { DelayedPriceBanner } from "../components/DelayedPriceBanner";
 import { openDirections } from "../utils/directions";
 import { Ionicons } from "@expo/vector-icons";
 import { useFavorites } from "../context/FavoritesContext";
@@ -22,6 +23,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "StationDetail">;
 export function StationDetailScreen({ route }: Props) {
   const { stationId, station: seed } = route.params;
   const [station, setStation] = useState<Station | StationDetail | null>(seed ?? null);
+  const [pricesAsOf, setPricesAsOf] = useState<string | null>(null);
   const [loading, setLoading] = useState(!seed);
   const [error, setError] = useState<string | null>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -34,7 +36,10 @@ export function StationDetailScreen({ route }: Props) {
     let cancelled = false;
     fetchStationDetail(stationId)
       .then((data) => {
-        if (!cancelled) setStation(data);
+        if (!cancelled) {
+          setStation(data.station);
+          setPricesAsOf(data.pricesAsOf);
+        }
       })
       .catch((err) => {
         // If we already have summary data from the list/map, keep showing it
@@ -66,11 +71,18 @@ export function StationDetailScreen({ route }: Props) {
   }
 
   const cityLine = [station.postCode, station.place].filter(Boolean).join(" ");
-  const chartFuelType = fuelType === "all" ? FUEL_TYPES[0] : fuelType;
   const availableFuels = FUEL_TYPES.filter((f) => station[f] != null);
+  // Charting FUEL_TYPES[0] (gasoline_95) unconditionally would show "no data"
+  // forever for a station that doesn't even sell it — fall back to whichever
+  // fuel this station actually has.
+  const chartFuelType = fuelType === "all" ? (availableFuels[0] ?? FUEL_TYPES[0]) : fuelType;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={styles.headerRow}>
         <View style={styles.headerText}>
           <Text style={styles.name}>{station.brand || station.name}</Text>
@@ -97,6 +109,8 @@ export function StationDetailScreen({ route }: Props) {
         <Ionicons name="navigate" size={16} color={colors.accentOn} />
         <Text style={styles.directionsButtonText}>{t("detail.directions")}</Text>
       </Pressable>
+
+      {pricesAsOf && <View style={styles.delayedBannerWrap}><DelayedPriceBanner pricesAsOf={pricesAsOf} /></View>}
 
       <View style={styles.priceCard}>
         {availableFuels.map((fuel, index) => (
@@ -157,6 +171,7 @@ function createStyles(colors: ColorScheme) {
       paddingVertical: spacing.sm,
       marginTop: spacing.md,
     },
+    delayedBannerWrap: { marginTop: spacing.md },
     directionsButtonText: { color: colors.accentOn, fontSize: 14, fontWeight: "700" },
     name: { fontSize: 22, fontWeight: "800", color: colors.textPrimary },
     address: { fontSize: 14, color: colors.textSecondary, marginTop: 6 },

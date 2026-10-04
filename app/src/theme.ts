@@ -7,6 +7,7 @@ export interface ColorScheme {
   textMuted: string;
   accent: string;
   accentOn: string;
+  accentMuted: string;
   pillInactive: string;
   cheap: string;
   cheapBg: string;
@@ -27,8 +28,9 @@ export const lightColors: ColorScheme = {
   textPrimary: "#111827",
   textSecondary: "#6b7280",
   textMuted: "#9ca3af",
-  accent: "#111827",
+  accent: "#1A8A60",
   accentOn: "#ffffff",
+  accentMuted: "#e5f4ee",
   pillInactive: "#f0f1f3",
   cheap: "#16a34a",
   cheapBg: "#eafbf1",
@@ -49,8 +51,9 @@ export const darkColors: ColorScheme = {
   textPrimary: "#f2f2f3",
   textSecondary: "#a6a6ab",
   textMuted: "#77777c",
-  accent: "#f2f2f3",
-  accentOn: "#1c1c1e",
+  accent: "#34C98C",
+  accentOn: "#0d2b1e",
+  accentMuted: "#132920",
   pillInactive: "#2c2c2e",
   cheap: "#34d058",
   cheapBg: "#12291a",

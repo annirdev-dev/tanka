@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
@@ -7,6 +7,8 @@ import { useLocale } from "../context/LocaleContext";
 import { usePurchase } from "../context/PurchaseContext";
 import { TranslationKey } from "../i18n/translations";
 import { AccountSection } from "../components/AccountSection";
+import { LegalScreen } from "../components/LegalScreen";
+import { privacyPolicy, terms } from "../legal/content";
 import { radii, spacing, ColorScheme } from "../theme";
 
 const CHIPS: { key: TranslationKey; icon: keyof typeof Ionicons.glyphMap }[] = [
@@ -14,12 +16,6 @@ const CHIPS: { key: TranslationKey; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: "onboarding.chip.alerts", icon: "notifications-outline" },
   { key: "onboarding.chip.savings", icon: "wallet-outline" },
 ];
-
-// Opens the public legal page rather than the in-app Privacy/Terms screens —
-// this runs before onboarding completes, so there's no NavigationContainer
-// mounted yet to navigate within.
-const PRIVACY_URL = "https://annirdev-dev.github.io/tanken-legal/#datenschutz";
-const TERMS_URL = "https://annirdev-dev.github.io/tanken-legal/#nutzungsbedingungen";
 
 // Shown once, before anything else, until the user signs in or buys Pro
 // outright — required so every user has an account (or a purchase) from the
@@ -30,20 +26,31 @@ const TERMS_URL = "https://annirdev-dev.github.io/tanken-legal/#nutzungsbedingun
 // so it reads as a preview of real features rather than another feature list.
 export function OnboardingScreen() {
   const { colors } = useTheme();
-  const { t } = useLocale();
-  const { priceLabel, purchasePro, restorePurchases } = usePurchase();
+  const { t, locale, setLocale } = useLocale();
+  const { trialDaysLeft, restorePurchases } = usePurchase();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const [legalModal, setLegalModal] = useState<"privacy" | "terms" | null>(null);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={[
-        styles.content,
-        { paddingTop: insets.top + spacing.xl * 2, paddingBottom: insets.bottom + spacing.xl },
-      ]}
-      keyboardShouldPersistTaps="handled"
-    >
+    <View style={styles.screen}>
+      <Pressable
+        style={[styles.languageToggle, { top: insets.top + spacing.sm }]}
+        onPress={() => setLocale(locale === "pt" ? "en" : "pt")}
+        hitSlop={8}
+      >
+        <Ionicons name="language-outline" size={14} color={colors.textSecondary} />
+        <Text style={styles.languageToggleText}>{locale === "pt" ? "English" : "Português"}</Text>
+      </Pressable>
+
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + spacing.xl * 2, paddingBottom: insets.bottom + spacing.xl },
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
       <View style={styles.top}>
         <View style={styles.heroBackdrop}>
           <View style={styles.heroIcon}>
@@ -51,7 +58,7 @@ export function OnboardingScreen() {
           </View>
         </View>
         <Text style={styles.title}>{t("onboarding.title")}</Text>
-        <Text style={styles.subtitle}>{t("onboarding.trialCta")}</Text>
+        <Text style={styles.subtitle}>{t("onboarding.subtitle")}</Text>
 
         <View style={styles.chipRow}>
           {CHIPS.map((chip) => (
@@ -66,47 +73,69 @@ export function OnboardingScreen() {
       <View style={styles.actions}>
         <AccountSection showHint={false} />
 
-        <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>{t("pro.or")}</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        <Pressable style={styles.buyButton} onPress={purchasePro}>
-          <Text style={styles.buyButtonText}>
-            {priceLabel ? t("pro.unlockFor", { price: priceLabel }) : t("pro.unlock")}
-          </Text>
-        </Pressable>
-        <Pressable onPress={restorePurchases} hitSlop={8}>
-          <Text style={styles.restoreText}>{t("pro.restore")}</Text>
-        </Pressable>
+        <Text style={styles.trialNote}>{t("onboarding.trialNote", { days: trialDaysLeft })}</Text>
 
         <Text style={styles.legalText}>
           {t("onboarding.legalPrefix")}{" "}
-          <Text style={styles.legalLink} onPress={() => Linking.openURL(PRIVACY_URL)}>
+          <Text style={styles.legalLink} onPress={() => setLegalModal("privacy")}>
             {t("legal.privacyPolicy")}
           </Text>{" "}
           {t("onboarding.legalAnd")}{" "}
-          <Text style={styles.legalLink} onPress={() => Linking.openURL(TERMS_URL)}>
+          <Text style={styles.legalLink} onPress={() => setLegalModal("terms")}>
             {t("legal.terms")}
           </Text>
           .
         </Text>
+
+        <Pressable onPress={restorePurchases} hitSlop={8}>
+          <Text style={styles.restoreText}>{t("pro.restore")}</Text>
+        </Pressable>
       </View>
-    </ScrollView>
+
+      <Modal
+        visible={legalModal != null}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setLegalModal(null)}
+      >
+        <View style={styles.modalHeader}>
+          <Pressable onPress={() => setLegalModal(null)} hitSlop={8}>
+            <Ionicons name="close" size={24} color={colors.textPrimary} />
+          </Pressable>
+        </View>
+        <LegalScreen doc={legalModal === "privacy" ? privacyPolicy : terms} />
+      </Modal>
+      </ScrollView>
+    </View>
   );
 }
 
 function createStyles(colors: ColorScheme) {
   return StyleSheet.create({
+    screen: { flex: 1, backgroundColor: colors.background },
     container: { flex: 1, backgroundColor: colors.background },
     content: { flexGrow: 1, paddingHorizontal: spacing.xl, justifyContent: "space-between" },
+    languageToggle: {
+      position: "absolute",
+      right: spacing.lg,
+      zIndex: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      backgroundColor: colors.surface,
+      borderRadius: radii.pill,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs + 2,
+    },
+    languageToggleText: { fontSize: 12.5, fontWeight: "700", color: colors.textSecondary },
     top: { alignItems: "center" },
     heroBackdrop: {
       width: 132,
       height: 132,
       borderRadius: 66,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.accentMuted,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: spacing.xl,
@@ -118,6 +147,11 @@ function createStyles(colors: ColorScheme) {
       backgroundColor: colors.accent,
       alignItems: "center",
       justifyContent: "center",
+      shadowColor: colors.accent,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      elevation: 4,
     },
     title: {
       fontSize: 28,
@@ -145,38 +179,25 @@ function createStyles(colors: ColorScheme) {
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.accentMuted,
       borderRadius: radii.pill,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.xs + 3,
     },
     chipText: { fontSize: 12.5, fontWeight: "700", color: colors.textPrimary },
     actions: { width: "100%" },
-    dividerRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: spacing.sm,
-      alignSelf: "stretch",
-      marginVertical: spacing.md,
-      paddingHorizontal: spacing.lg,
+    trialNote: {
+      fontSize: 12.5,
+      color: colors.textMuted,
+      fontWeight: "600",
+      textAlign: "center",
+      marginTop: spacing.md,
     },
-    dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
-    dividerText: { fontSize: 12, color: colors.textMuted, fontWeight: "600" },
-    buyButton: {
-      marginHorizontal: spacing.lg,
-      backgroundColor: colors.surface,
-      borderWidth: 1.5,
-      borderColor: colors.accent,
-      borderRadius: radii.sm,
-      paddingVertical: spacing.sm + 2,
-      alignItems: "center",
-    },
-    buyButtonText: { color: colors.accent, fontWeight: "700", fontSize: 14.5 },
     restoreText: {
       fontSize: 12,
       color: colors.textMuted,
       fontWeight: "600",
-      marginTop: spacing.md,
+      marginTop: spacing.lg,
       textAlign: "center",
     },
     legalText: {
@@ -191,6 +212,11 @@ function createStyles(colors: ColorScheme) {
       color: colors.textSecondary,
       fontWeight: "700",
       textDecorationLine: "underline",
+    },
+    modalHeader: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      padding: spacing.lg,
     },
   });
 }

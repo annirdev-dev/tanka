@@ -8,6 +8,7 @@ import { useAlarms, Alarm } from "../context/AlarmsContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLocale } from "../context/LocaleContext";
 import { SavingsSummaryCard } from "../components/SavingsSummaryCard";
+import { FUEL_LABELS } from "../types/station";
 import { radii, spacing, ColorScheme } from "../theme";
 import { RootStackParamList, TabParamList } from "../navigation/types";
 
@@ -44,7 +45,7 @@ export function AlertsScreen({ navigation }: Props) {
               </Text>
               <Text style={styles.detail}>
                 {t("alerts.rowText", {
-                  fuel: item.fuelType.toUpperCase(),
+                  fuel: FUEL_LABELS[item.fuelType],
                   price: item.targetPrice.toFixed(3),
                 })}
               </Text>

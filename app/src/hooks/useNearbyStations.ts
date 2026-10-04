@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchNearbyStations } from "../api/client";
+import { usePurchase } from "../context/PurchaseContext";
 import { FuelType, SortBy, Station } from "../types/station";
 
 interface Options {
@@ -13,10 +14,15 @@ export function useNearbyStations(
   options: Options = {}
 ) {
   const [stations, setStations] = useState<Station[]>([]);
+  const [pricesAsOf, setPricesAsOf] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { rad, type, sort } = options;
+  // Live vs delayed prices is decided by the server per account, so when the
+  // account's entitlement changes (Pro purchase recorded, trial ended) the
+  // prices already on screen are the wrong kind and must be fetched again.
+  const { entitlementVersion } = usePurchase();
   // The API only includes price fields for the requested fuel type, so stale
   // stations from a previous type would render mismatched/missing prices if
   // left on screen while the new type's request is still in flight.
@@ -36,7 +42,8 @@ export function useNearbyStations(
     try {
       const result = await fetchNearbyStations(coords.lat, coords.lng, { rad, type, sort });
       if (requestIdRef.current !== requestId) return;
-      setStations(result);
+      setStations(result.stations);
+      setPricesAsOf(result.pricesAsOf);
       lastFetchedType.current = type;
     } catch (err) {
       if (requestIdRef.current !== requestId) return;
@@ -44,11 +51,11 @@ export function useNearbyStations(
     } finally {
       if (requestIdRef.current === requestId) setLoading(false);
     }
-  }, [coords, rad, type, sort]);
+  }, [coords, rad, type, sort, entitlementVersion]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  return { stations, loading, error, refresh };
+  return { stations, pricesAsOf, loading, error, refresh };
 }

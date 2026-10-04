@@ -5,8 +5,8 @@ import { Linking, Platform, Share } from "react-native";
 // here then (e.g. "https://apps.apple.com/app/id0000000000"). Until it's set,
 // the iOS "open the store page" fallback is skipped — the native in-app
 // rating prompt does not need it.
-const PLAY_URL = "https://play.google.com/store/apps/details?id=com.tanken.app";
-export const APP_STORE_URL = "https://apps.apple.com/app/id6811379595";
+const PLAY_URL = "https://play.google.com/store/apps/details?id=com.tanka.app";
+export const APP_STORE_URL = "https://apps.apple.com/app/id6816023784";
 
 // expo-store-review resolves its native module eagerly on import, so a build
 // made before this package was added throws right here. Swallow it — every

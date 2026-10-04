@@ -69,7 +69,11 @@ export function StationListItem({
       <View style={[styles.right, compact && styles.rightCompact]}>
         {!compact && (
           <View style={styles.iconRow}>
-            <Pressable onPress={handleShare} hitSlop={14} style={styles.shareButton}>
+            <Pressable
+              onPress={handleShare}
+              hitSlop={{ top: 8, bottom: 4, left: 8, right: 8 }}
+              style={styles.shareButton}
+            >
               <Ionicons name="share-outline" size={20} color={colors.textMuted} />
             </Pressable>
             <FavoriteButton active={isFavorite(station.id)} onPress={() => toggleFavorite(station)} />
@@ -106,7 +110,7 @@ function createStyles(colors: ColorScheme) {
     address: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
     statusRow: { flexDirection: "row", alignItems: "center", marginTop: spacing.xs },
     dist: { fontSize: 12, color: colors.textMuted },
-    right: { alignItems: "flex-end", justifyContent: "center", paddingVertical: spacing.sm, paddingRight: spacing.md, paddingLeft: spacing.xs, gap: 2 },
+    right: { alignItems: "flex-end", justifyContent: "center", paddingVertical: spacing.sm, paddingRight: spacing.md, paddingLeft: spacing.xs, gap: spacing.xs + 2 },
     iconRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
     shareButton: { padding: 6 },
     rightCompact: { paddingVertical: spacing.xs },

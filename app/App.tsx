@@ -5,8 +5,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { ThemeProvider, useTheme } from "./src/context/ThemeContext";
 import { LocaleProvider } from "./src/context/LocaleContext";
-import { StationFiltersProvider } from "./src/context/StationFiltersContext";
 import { LocationOverrideProvider } from "./src/context/LocationOverrideContext";
+import { StationFiltersProvider } from "./src/context/StationFiltersContext";
 import { FavoritesProvider } from "./src/context/FavoritesContext";
 import { AlarmsProvider } from "./src/context/AlarmsContext";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
@@ -21,7 +21,7 @@ import { OnboardingScreen } from "./src/screens/OnboardingScreen";
 // Onboarding is a one-time gate — either path proves they're past it, and
 // neither signing out nor anything else brings this screen back afterwards,
 // since Map/prices/directions stay free regardless of sign-in state.
-const ONBOARDING_KEY = "tanken:onboarded";
+const ONBOARDING_KEY = "tanka:onboarded";
 
 function AppContent() {
   const { resolvedScheme, colors } = useTheme();
@@ -69,19 +69,19 @@ export default function App() {
     <SafeAreaProvider>
       <ThemeProvider>
         <LocaleProvider>
-          <FavoritesProvider>
-            <AlarmsProvider>
-              <AuthProvider>
-                <StationFiltersProvider>
-                  <LocationOverrideProvider>
+          <LocationOverrideProvider>
+            <FavoritesProvider>
+              <AlarmsProvider>
+                <AuthProvider>
+                  <StationFiltersProvider>
                     <PurchaseProvider>
                       <AppContent />
                     </PurchaseProvider>
-                  </LocationOverrideProvider>
-                </StationFiltersProvider>
-              </AuthProvider>
-            </AlarmsProvider>
-          </FavoritesProvider>
+                  </StationFiltersProvider>
+                </AuthProvider>
+              </AlarmsProvider>
+            </FavoritesProvider>
+          </LocationOverrideProvider>
         </LocaleProvider>
       </ThemeProvider>
     </SafeAreaProvider>

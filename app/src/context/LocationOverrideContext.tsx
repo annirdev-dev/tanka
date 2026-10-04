@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TEST_TOOLS } from "../lib/testTools";
 
 const STORAGE_KEY = "tanka:location-override";
 
@@ -15,10 +16,13 @@ interface LocationOverrideContextValue {
 
 const LocationOverrideContext = createContext<LocationOverrideContextValue | undefined>(undefined);
 
+// Test builds only (see lib/testTools): in any other build the stored value is
+// never read, so a leftover override can't ever move a real user's location.
 export function LocationOverrideProvider({ children }: { children: React.ReactNode }) {
   const [override, setOverrideState] = useState<Coords | null>(null);
 
   useEffect(() => {
+    if (!TEST_TOOLS) return;
     AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
       if (!raw) return;
       try {

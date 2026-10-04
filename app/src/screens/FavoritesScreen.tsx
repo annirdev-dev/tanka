@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CompositeScreenProps } from "@react-navigation/native";
@@ -7,6 +7,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFavorites } from "../context/FavoritesContext";
 import { useStationFilters } from "../context/StationFiltersContext";
 import { useAlarms } from "../context/AlarmsContext";
+import { usePurchase } from "../context/PurchaseContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLocale } from "../context/LocaleContext";
 import { StationListItem } from "../components/StationListItem";
@@ -26,6 +27,7 @@ export function FavoritesScreen({ navigation }: Props) {
   const { favorites, updateFavoritePrices } = useFavorites();
   const { fuelType } = useStationFilters();
   const { checkAndNotify } = useAlarms();
+  const { entitlementVersion } = usePurchase();
   const { colors } = useTheme();
   const { t } = useLocale();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -72,6 +74,14 @@ export function FavoritesScreen({ navigation }: Props) {
       setRefreshing(false);
     }
   };
+
+  // Favorites keep their last-fetched prices, which are delayed or live per
+  // the account — reload them when that entitlement changes (Pro purchase
+  // recorded, trial ended or restarted), not just on pull-to-refresh.
+  useEffect(() => {
+    if (entitlementVersion > 0) refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entitlementVersion]);
 
   return (
     <View style={styles.container}>

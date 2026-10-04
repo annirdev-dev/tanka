@@ -27,7 +27,7 @@ const SHOW_DELAY_MS = 2500;
 
 // Mounted once near the app root. On each cold start it counts the launch and,
 // if the usage bar is cleared and we're outside the cooldown, shows a single
-// "Enjoying Tanken?" sheet — routing happy users to the store rating prompt
+// "Enjoying Tanka?" sheet — routing happy users to the store rating prompt
 // and unhappy ones to a private feedback email.
 export function AppReviewPrompt() {
   const { t } = useLocale();

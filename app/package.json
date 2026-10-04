@@ -21,6 +21,7 @@
     "expo-secure-store": "~57.0.3",
     "expo-status-bar": "~57.0.1",
     "expo-store-review": "~57.0.2",
+    "expo-updates": "~57.0.23",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-maps": "1.27.2",
@@ -35,8 +36,8 @@
   },
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "private": true

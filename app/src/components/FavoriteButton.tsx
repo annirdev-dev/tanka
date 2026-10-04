@@ -18,7 +18,7 @@ export function FavoriteButton({
   return (
     <Pressable
       onPress={hasPro ? onPress : () => presentPaywall("favorites")}
-      hitSlop={14}
+      hitSlop={{ top: 8, bottom: 4, left: 8, right: 8 }}
       style={styles.button}
     >
       <Ionicons

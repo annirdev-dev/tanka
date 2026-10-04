@@ -3,6 +3,24 @@ export interface LatLng {
   lng: number;
 }
 
+// Where Tanka has data: mainland Portugal, Madeira and the Azores (same boxes
+// the backend accepts).
+const PORTUGAL_BOXES = [
+  { minLat: 36.8, maxLat: 42.3, minLng: -9.7, maxLng: -6.0 },
+  { minLat: 32.2, maxLat: 33.3, minLng: -17.4, maxLng: -16.1 },
+  { minLat: 36.8, maxLat: 39.9, minLng: -31.5, maxLng: -24.8 },
+];
+
+export function isInPortugal(p: LatLng): boolean {
+  return PORTUGAL_BOXES.some(
+    (b) => p.lat >= b.minLat && p.lat <= b.maxLat && p.lng >= b.minLng && p.lng <= b.maxLng
+  );
+}
+
+// What the app shows when it can't use the real location (outside Portugal,
+// permission off), so it is never an empty screen.
+export const LISBON: LatLng = { lat: 38.7223, lng: -9.1393 };
+
 export function distanceKm(a: LatLng, b: LatLng): number {
   const R = 6371;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;

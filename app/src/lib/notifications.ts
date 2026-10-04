@@ -44,6 +44,30 @@ export function scheduleNotificationAsync(
   return Notifications.scheduleNotificationAsync(request);
 }
 
+// Fires once at a specific future moment — unlike the channel-only trigger
+// used for price alerts (which fires immediately), this works even if the
+// app is closed the whole time, since it's scheduled at the OS level.
+export function scheduleDateNotificationAsync(
+  content: ExpoNotifications.NotificationContentInput,
+  date: Date,
+  channelId?: string
+): Promise<string | undefined> {
+  if (!Notifications) return Promise.resolve(undefined);
+  return Notifications.scheduleNotificationAsync({
+    content,
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date,
+      ...(channelId ? { channelId } : {}),
+    },
+  });
+}
+
+export function cancelScheduledNotificationAsync(id: string): Promise<void> {
+  if (!Notifications) return Promise.resolve();
+  return Notifications.cancelScheduledNotificationAsync(id);
+}
+
 export function setNotificationChannelAsync(
   channelId: string,
   channel: ExpoNotifications.NotificationChannelInput

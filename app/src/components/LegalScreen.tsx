@@ -5,7 +5,7 @@ import { useLocale } from "../context/LocaleContext";
 import { LegalDoc } from "../legal/content";
 import { spacing, ColorScheme } from "../theme";
 
-export function LegalScreen({ doc }: { doc: { de: LegalDoc; en: LegalDoc } }) {
+export function LegalScreen({ doc }: { doc: { pt: LegalDoc; en: LegalDoc } }) {
   const { locale } = useLocale();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);

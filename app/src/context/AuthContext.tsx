@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import { deleteAccountOnServer } from "../api/client";
 
 export interface AuthUser {
   email: string | null;
   name: string | null;
+  // Sign-in methods linked to this account, e.g. ["apple"] or ["google"].
+  providers: string[];
 }
 
 interface AuthContextValue {
@@ -12,7 +15,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  deleteAccount: () => Promise<void>;
+  deleteAccount: (appleAuthorizationCode?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -20,9 +23,11 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 function toAuthUser(session: Session | null): AuthUser | null {
   if (!session?.user) return null;
   const meta = session.user.user_metadata ?? {};
+  const providers = (session.user.identities ?? []).map((identity) => identity.provider);
   return {
     email: session.user.email ?? null,
     name: (meta.full_name as string) ?? (meta.name as string) ?? null,
+    providers,
   };
 }
 
@@ -47,8 +52,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const deleteAccount = async () => {
-    await supabase.rpc("delete_own_account");
+  // Only signs out once the server confirms the account is really gone — a
+  // failure throws so the UI can say so, instead of looking like it worked.
+  const deleteAccount = async (appleAuthorizationCode?: string) => {
+    await deleteAccountOnServer(appleAuthorizationCode);
     await supabase.auth.signOut();
   };
 

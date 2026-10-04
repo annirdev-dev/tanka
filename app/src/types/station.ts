@@ -38,7 +38,7 @@ export const FUEL_NAMES: Record<ConcreteFuelType, string> = {
 };
 
 export type SortBy = "price" | "dist";
-export type HistoryRange = "12h" | "24h" | "3d" | "1w";
+export type HistoryRange = "24h" | "3d" | "1w";
 
 export interface TrendInfo {
   delta: number;

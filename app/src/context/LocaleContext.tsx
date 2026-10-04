@@ -4,7 +4,7 @@ import { translations, TranslationKey } from "../i18n/translations";
 
 const STORAGE_KEY = "tanka:locale";
 
-export type Locale = "de" | "en";
+export type Locale = "pt" | "en";
 
 interface LocaleContextValue {
   locale: Locale;
@@ -14,14 +14,14 @@ interface LocaleContextValue {
 
 const LocaleContext = createContext<LocaleContextValue | undefined>(undefined);
 
-// Defaults to German — the app's primary market is Germany (Tankerkoenig only
-// covers German fuel stations) — with English available as an alternative.
+// Defaults to Portuguese — the app's primary market is Portugal (API Aberta
+// only covers Portuguese fuel stations) — with English available as an alternative.
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocale] = useState<Locale>("de");
+  const [locale, setLocale] = useState<Locale>("pt");
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
-      if (raw === "de" || raw === "en") setLocale(raw);
+      if (raw === "pt" || raw === "en") setLocale(raw);
     });
   }, []);
 

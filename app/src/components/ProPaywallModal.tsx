@@ -3,16 +3,9 @@ import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { usePurchase } from "../context/PurchaseContext";
 import { useLocale } from "../context/LocaleContext";
-import { TranslationKey } from "../i18n/translations";
 import { useTheme } from "../context/ThemeContext";
+import { PRO_FEATURES } from "../lib/proFeatures";
 import { radii, spacing, ColorScheme } from "../theme";
-
-const FEATURES: { key: string; pitchKey: TranslationKey; featureKey: TranslationKey }[] = [
-  { key: "favorites", pitchKey: "pro.pitch.favorites", featureKey: "pro.feature.favorites" },
-  { key: "alerts", pitchKey: "pro.pitch.alerts", featureKey: "pro.feature.alerts" },
-  { key: "onMyWay", pitchKey: "pro.pitch.onMyWay", featureKey: "pro.feature.onMyWay" },
-  { key: "savings", pitchKey: "pro.pitch.savings", featureKey: "pro.feature.savings" },
-];
 
 export function ProPaywallModal() {
   const {
@@ -23,6 +16,7 @@ export function ProPaywallModal() {
     restorePurchases,
     priceLabel,
     isSignedIn,
+    trialDaysLeft,
   } = usePurchase();
   const { t } = useLocale();
   const { colors } = useTheme();
@@ -35,16 +29,19 @@ export function ProPaywallModal() {
           <View style={styles.iconCircle}>
             <Ionicons name="star" size={22} color={colors.accentOn} />
           </View>
-          <Text style={styles.title}>{t("pro.title")}</Text>
+          <Text style={styles.title}>
+            {paywallFeature === "trialEnded" ? t("pro.trialEndedTitle") : t("pro.title")}
+          </Text>
           <Text style={styles.subtitle}>
             {(() => {
-              const matched = FEATURES.find((f) => f.key === paywallFeature);
+              if (paywallFeature === "trialEnded") return t("pro.pitchTrialEnded");
+              const matched = PRO_FEATURES.find((f) => f.key === paywallFeature);
               return t(matched?.pitchKey ?? "pro.pitchGeneric");
             })()}
           </Text>
 
           <View style={styles.featureList}>
-            {FEATURES.map((feature) => (
+            {PRO_FEATURES.map((feature) => (
               <View key={feature.key} style={styles.featureRow}>
                 <Ionicons name="checkmark-circle" size={16} color={colors.cheap} />
                 <Text style={styles.featureText}>{t(feature.featureKey)}</Text>
@@ -52,7 +49,9 @@ export function ProPaywallModal() {
             ))}
           </View>
 
-          {!isSignedIn && <Text style={styles.signInHint}>{t("pro.signInHint")}</Text>}
+          {!isSignedIn && (
+            <Text style={styles.signInHint}>{t("pro.signInHint", { days: trialDaysLeft })}</Text>
+          )}
 
           <Pressable style={styles.buyButton} onPress={purchasePro}>
             <Text style={styles.buyButtonText}>

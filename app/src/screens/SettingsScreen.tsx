@@ -3,7 +3,7 @@ import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View }
 import * as Notifications from "../lib/notifications";
 import * as Location from "expo-location";
 import Constants from "expo-constants";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { CompositeScreenProps, useFocusEffect } from "@react-navigation/native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -15,7 +15,10 @@ import { useTheme, ThemeMode } from "../context/ThemeContext";
 import { useLocale, Locale } from "../context/LocaleContext";
 import { OptionDropdown } from "../components/OptionDropdown";
 import { AccountSection } from "../components/AccountSection";
+import { TestToolsSection } from "../components/TestToolsSection";
+import { TEST_TOOLS } from "../lib/testTools";
 import { requestAppReview, shareApp } from "../lib/appReview";
+import { PRO_FEATURES } from "../lib/proFeatures";
 import { radii, spacing, ColorScheme } from "../theme";
 import { RootStackParamList, TabParamList } from "../navigation/types";
 import { FUEL_LABELS, FUEL_TYPES } from "../types/station";
@@ -43,6 +46,7 @@ export function SettingsScreen({ navigation }: Props) {
   } = usePurchase();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [proExpanded, setProExpanded] = useState(false);
   const [locationStatus, setLocationStatus] = useState<Location.PermissionStatus | null>(null);
 
   useFocusEffect(
@@ -113,7 +117,7 @@ export function SettingsScreen({ navigation }: Props) {
     { label: t("settings.themeDark"), value: "dark" },
   ];
   const localeOptions: { label: string; value: Locale }[] = [
-    { label: "Deutsch", value: "de" },
+    { label: "Português", value: "pt" },
     { label: "English", value: "en" },
   ];
   const fuelTypeOptions: { label: string; value: typeof fuelType }[] = [
@@ -127,45 +131,82 @@ export function SettingsScreen({ navigation }: Props) {
         <AccountSection />
       </Section>
 
-      <Section title={t("settings.proSection")} styles={styles}>
-        <View style={[styles.proCard, !hasPurchased && styles.proCardWithFooter]}>
-          <View style={styles.proTitleRow}>
-            <Ionicons
-              name={hasPurchased ? "star" : "star-outline"}
-              size={16}
-              color={colors.accent}
-            />
-            <Text style={styles.proTitle}>
-              {hasPurchased
-                ? t("settings.proUnlocked")
-                : trialActive
-                  ? t("settings.proTrialActive", { days: trialDaysLeft })
-                  : t("settings.proLocked")}
-            </Text>
-          </View>
-          <Text style={styles.rowHint}>
-            {hasPurchased
-              ? t("settings.proUnlockedHint")
-              : trialActive
-                ? t("settings.proTrialHint")
-                : isSignedIn
-                  ? t("settings.proLockedHint")
-                  : t("settings.proSignInHint")}
-          </Text>
-          {!hasPurchased && (
-            <Pressable style={styles.proButton} onPress={purchasePro}>
-              <Text style={styles.proButtonText}>
-                {priceLabel ? t("pro.unlockFor", { price: priceLabel }) : t("pro.unlock")}
-              </Text>
-            </Pressable>
+      <View style={styles.section}>
+        <View style={styles.proCard}>
+          <Pressable
+            style={styles.proHeaderRow}
+            onPress={() => !hasPurchased && setProExpanded((v) => !v)}
+            accessibilityRole={hasPurchased ? undefined : "button"}
+          >
+            <View style={styles.proIconCircle}>
+              <MaterialIcons name="verified" size={22} color={colors.accentOn} />
+            </View>
+            <View style={styles.proHeaderText}>
+              <Text style={styles.proCardTitle}>{t("pro.title")}</Text>
+            </View>
+            {!hasPurchased && (
+              <Ionicons
+                name={proExpanded ? "chevron-up" : "chevron-down"}
+                size={18}
+                color={colors.textMuted}
+              />
+            )}
+          </Pressable>
+
+          {!hasPurchased && proExpanded && (
+            <>
+              {trialActive && (
+                <View style={styles.proStatusPill}>
+                  <Text style={styles.proStatusPillText}>
+                    {t("settings.proTrialActive", { days: trialDaysLeft })}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.proPriceBlock}>
+                <Text style={styles.proBigPrice}>{priceLabel || "—"}</Text>
+                <Text style={styles.proPriceCaption}>{t("pro.oneTimeCaption")}</Text>
+              </View>
+              <View style={styles.proDivider} />
+              <View style={styles.proFeatureList}>
+                <View style={styles.proFeatureHeaderRow}>
+                  <Text style={styles.proFeatureLabel} />
+                  <Text style={styles.proFeatureColHeader}>{t("pro.free")}</Text>
+                  <Text style={[styles.proFeatureColHeader, styles.proFeatureColHeaderPro]}>
+                    {t("pro.title")}
+                  </Text>
+                </View>
+                {PRO_FEATURES.map((feature) => (
+                  <View key={feature.key} style={styles.proFeatureRow}>
+                    <Text style={styles.proFeatureText}>{t(feature.featureKey)}</Text>
+                    <View style={styles.proFeatureCol}>
+                      <Ionicons name="remove" size={16} color={colors.textMuted} />
+                    </View>
+                    <View style={styles.proFeatureCol}>
+                      <MaterialIcons name="verified" size={20} color={colors.accent} />
+                    </View>
+                  </View>
+                ))}
+              </View>
+
+              {!trialActive && (
+                <Text style={[styles.rowHint, styles.proHint]}>
+                  {isSignedIn ? t("settings.proLockedHint") : t("settings.proSignInHint", { days: trialDaysLeft })}
+                </Text>
+              )}
+              <Pressable style={styles.proButton} onPress={purchasePro}>
+                <Text style={styles.proButtonText}>{t("pro.unlock")}</Text>
+              </Pressable>
+              <Pressable style={styles.proRestoreLink} onPress={restorePurchases} hitSlop={8}>
+                <Text style={styles.proRestoreLinkText}>{t("settings.proRestore")}</Text>
+              </Pressable>
+            </>
+          )}
+
+          {hasPurchased && (
+            <Text style={[styles.rowHint, styles.proHint]}>{t("settings.proUnlockedHint")}</Text>
           )}
         </View>
-        {!hasPurchased && (
-          <Row onPress={restorePurchases} styles={styles} icon="refresh-outline" last>
-            <Text style={styles.rowLabel}>{t("settings.proRestore")}</Text>
-          </Row>
-        )}
-      </Section>
+      </View>
 
       <Section title={t("settings.preferences")} styles={styles}>
         <Row styles={styles} icon="contrast-outline">
@@ -318,6 +359,8 @@ export function SettingsScreen({ navigation }: Props) {
           <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </Row>
       </Section>
+
+      {TEST_TOOLS && <TestToolsSection />}
     </ScrollView>
   );
 }
@@ -373,14 +416,14 @@ function createStyles(colors: ColorScheme) {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.surface },
     content: { padding: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xl * 2 },
-    section: { marginBottom: spacing.xl },
+    section: { marginBottom: spacing.md },
     sectionTitle: {
       fontSize: 12,
       fontWeight: "700",
       color: colors.textMuted,
       textTransform: "uppercase",
       letterSpacing: 0.6,
-      marginBottom: spacing.sm,
+      marginBottom: spacing.xs + 2,
       marginLeft: spacing.xs,
     },
     sectionBody: {
@@ -412,10 +455,77 @@ function createStyles(colors: ColorScheme) {
       paddingVertical: spacing.xs + 1,
     },
     fixText: { fontSize: 13, color: colors.accent, fontWeight: "700" },
-    proCard: { padding: spacing.lg },
-    proCardWithFooter: { borderBottomWidth: 1, borderBottomColor: colors.border },
-    proTitleRow: { flexDirection: "row", alignItems: "center", gap: spacing.xs + 1 },
-    proTitle: { fontSize: 15, color: colors.textPrimary, fontWeight: "700" },
+    proCard: {
+      padding: spacing.lg,
+      backgroundColor: colors.background,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    proHeaderRow: { flexDirection: "row", alignItems: "center", gap: spacing.md },
+    proIconCircle: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: colors.accent,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    proHeaderText: { flex: 1 },
+    proCardTitle: { fontSize: 17, color: colors.textPrimary, fontWeight: "800" },
+    proStatusPill: {
+      alignSelf: "center",
+      backgroundColor: colors.accentMuted,
+      borderRadius: radii.pill,
+      paddingHorizontal: spacing.md,
+      paddingVertical: 4,
+      marginTop: spacing.md,
+    },
+    proStatusPillText: { fontSize: 12, fontWeight: "700", color: colors.accent },
+    proPriceBlock: { marginTop: spacing.lg, alignItems: "center" },
+    proBigPrice: { fontSize: 32, fontWeight: "800", color: colors.textPrimary, letterSpacing: -0.5 },
+    proPriceCaption: {
+      fontSize: 12.5,
+      fontWeight: "600",
+      color: colors.textSecondary,
+      marginTop: spacing.xs,
+      textAlign: "center",
+    },
+    proDivider: {
+      marginTop: spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      borderStyle: "dashed",
+    },
+    proFeatureList: { marginTop: spacing.lg },
+    proFeatureHeaderRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingBottom: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+      marginBottom: spacing.sm + 2,
+    },
+    proFeatureLabel: { flex: 1 },
+    proFeatureColHeader: {
+      width: 48,
+      textAlign: "center",
+      fontSize: 10.5,
+      fontWeight: "800",
+      color: colors.textMuted,
+      textTransform: "uppercase",
+    },
+    proFeatureColHeaderPro: { color: colors.accent },
+    proFeatureRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: spacing.xs + 2,
+    },
+    proFeatureCol: { width: 48, alignItems: "center" },
+    proFeatureText: { flex: 1, fontSize: 13.5, color: colors.textPrimary, fontWeight: "600" },
+    proHint: { marginTop: spacing.md },
+    proRestoreLink: { alignItems: "center", marginTop: spacing.sm, padding: spacing.xs },
+    proRestoreLinkText: { fontSize: 13, fontWeight: "600", color: colors.textSecondary },
     proButton: {
       marginTop: spacing.md,
       backgroundColor: colors.accent,

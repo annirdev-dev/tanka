@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState } from "react-native";
 import * as Location from "expo-location";
 import { useLocationOverride } from "../context/LocationOverrideContext";
+import { LISBON, isInPortugal } from "../utils/geo";
 
 // getCurrentPositionAsync has no built-in timeout — without one, a stuck GPS/mock
 // provider (e.g. right after toggling a mock-location app) leaves the user on an
@@ -23,39 +25,53 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
   });
 }
 
+// Why the app is showing Lisbon instead of the real position:
+//  "outside" — the phone is outside Portugal (Tanka only has Portuguese stations)
+//  "off"     — location permission is off, or no fix could be obtained
+export type LocationFallback = "outside" | "off";
+
 interface LocationState {
   coords: { lat: number; lng: number } | null;
   errorMsg: string | null;
   loading: boolean;
+  fallback: LocationFallback | null;
   retry: () => void;
 }
 
+// A real fix inside Portugal is used as is; outside it there is nothing to
+// show, so the app falls back to Lisbon (and says so).
+function resolved(point: { lat: number; lng: number }): Omit<LocationState, "retry"> {
+  return isInPortugal(point)
+    ? { coords: point, errorMsg: null, loading: false, fallback: null }
+    : { coords: LISBON, errorMsg: null, loading: false, fallback: "outside" };
+}
+
 export function useLocation(): LocationState {
-  const { override } = useLocationOverride();
   const [state, setState] = useState<Omit<LocationState, "retry">>({
     coords: null,
     errorMsg: null,
     loading: true,
+    fallback: null,
   });
   const requestIdRef = useRef(0);
+  // Only ever non-null in test builds (see lib/testTools) — the provider never
+  // reads or sets it anywhere else.
+  const { override } = useLocationOverride();
 
   const load = useCallback(() => {
-    // A manual override (set in Settings) bypasses the OS location APIs
-    // entirely — sidesteps real-device GPS/mock-provider flakiness altogether.
+    const requestId = ++requestIdRef.current;
     if (override) {
-      requestIdRef.current++;
-      setState({ coords: { lat: override.lat, lng: override.lng }, errorMsg: null, loading: false });
+      setState({ coords: override, errorMsg: null, loading: false, fallback: null });
       return;
     }
-
-    const requestId = ++requestIdRef.current;
     setState((prev) => ({ ...prev, loading: true }));
 
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (requestIdRef.current !== requestId) return;
       if (status !== "granted") {
-        setState({ coords: null, errorMsg: "Location permission denied", loading: false });
+        // Not forced: without permission the app still works, showing Lisbon.
+        setState({ coords: LISBON, errorMsg: null, loading: false, fallback: "off" });
         return;
       }
 
@@ -68,11 +84,7 @@ export function useLocation(): LocationState {
       );
       if (requestIdRef.current !== requestId) return;
       if (lastKnown) {
-        setState({
-          coords: { lat: lastKnown.coords.latitude, lng: lastKnown.coords.longitude },
-          errorMsg: null,
-          loading: false,
-        });
+        setState(resolved({ lat: lastKnown.coords.latitude, lng: lastKnown.coords.longitude }));
       }
 
       try {
@@ -82,22 +94,29 @@ export function useLocation(): LocationState {
           "Timed out getting your location. Check that location services are enabled and try again."
         );
         if (requestIdRef.current !== requestId) return;
-        setState({
-          coords: { lat: position.coords.latitude, lng: position.coords.longitude },
-          errorMsg: null,
-          loading: false,
-        });
-      } catch (err) {
+        setState(resolved({ lat: position.coords.latitude, lng: position.coords.longitude }));
+      } catch {
         if (requestIdRef.current !== requestId) return;
-        // A cached fix is already showing — don't replace it with an error.
+        // A cached fix is already showing — don't replace it.
         if (lastKnown) return;
-        setState({ coords: null, errorMsg: (err as Error).message, loading: false });
+        setState({ coords: LISBON, errorMsg: null, loading: false, fallback: "off" });
       }
     })();
   }, [override]);
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  // Someone who turned location on in Settings comes back to the app: pick it
+  // up without needing a restart.
+  const fallbackRef = useRef<LocationFallback | null>(null);
+  fallbackRef.current = state.fallback;
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "active" && fallbackRef.current === "off") load();
+    });
+    return () => sub.remove();
   }, [load]);
 
   return { ...state, retry: load };

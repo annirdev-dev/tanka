@@ -9,12 +9,13 @@ import { useStationFilters } from "../context/StationFiltersContext";
 import { usePurchase } from "../context/PurchaseContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLocale } from "../context/LocaleContext";
+import { OptionDropdown } from "../components/OptionDropdown";
 import { fetchNearbyStations, fetchRoute } from "../api/client";
 import { displayPrice, formatPrice } from "../utils/price";
 import { buildPriceRanks } from "../utils/priceTier";
 import { cumulativeDistances, sampleAlongPolyline, closestOnPolyline, LatLng } from "../utils/geo";
 import { DARK_MAP_STYLE } from "../utils/mapStyle";
-import { Station } from "../types/station";
+import { ConcreteFuelType, FUEL_LABELS, FUEL_TYPES, Station } from "../types/station";
 import { radii, spacing, ColorScheme } from "../theme";
 import { RootStackParamList } from "../navigation/types";
 
@@ -23,7 +24,10 @@ type Props = NativeStackScreenProps<RootStackParamList, "OnMyWay">;
 // The route is split into this many equal segments and we keep the single
 // cheapest on-route station in each — so results are spread along the whole
 // drive instead of piling up wherever stations are densest (i.e. cities).
-const ROUTE_SEGMENTS = 8;
+// A real route through a dense area can have 50-100+ candidate stations —
+// too few segments hides the vast majority of them, making the feature look
+// like it's missing stations that are genuinely there.
+const ROUTE_SEGMENTS = 20;
 // How far off the road a station can sit and still count as "on the way".
 const CORRIDOR_KM = 4;
 // Ignore only the last stretch before the destination (you don't need a "stop
@@ -32,15 +36,23 @@ const CORRIDOR_KM = 4;
 // something.
 const START_SKIP_KM = 1.5;
 const END_SKIP_KM = 8;
-// One Tankerkoenig round trip per query point, and its API allows just one
-// request per minute — so a long route is deliberately capped at a few
-// spread-out query points rather than covering every kilometre.
-const MAX_QUERY_POINTS = 5;
-const KM_PER_QUERY_POINT = 60;
+// Query points must be spaced no more than 2x the search radius apart, or
+// there's a blind stretch of road between two circles where a real station
+// would never be found. rad is 25km below, so spacing stays under 50km.
+const MAX_QUERY_POINTS = 14;
+const KM_PER_QUERY_POINT = 45;
 
 export function OnMyWayScreen({ navigation }: Props) {
   const { coords, loading: locationLoading } = useLocation();
-  const { fuelType } = useStationFilters();
+  // Comparing raw prices across fuel types isn't meaningful (GPL is always
+  // far cheaper per litre than petrol/diesel regardless of which station is
+  // actually the best deal for the fuel you need) — "all" from the map's
+  // global filter would silently turn every result here into a GPL station,
+  // so this screen always needs one concrete fuel, chosen explicitly.
+  const { fuelType: globalFuelType } = useStationFilters();
+  const [fuelType, setFuelType] = useState<ConcreteFuelType>(
+    globalFuelType !== "all" ? globalFuelType : FUEL_TYPES[0]
+  );
   const { hasPro, presentPaywall } = usePurchase();
   const { colors, resolvedScheme } = useTheme();
   const { t } = useLocale();
@@ -63,6 +75,10 @@ export function OnMyWayScreen({ navigation }: Props) {
   } | null>(null);
 
   const canSearch = toText.trim().length > 0 && !searching && !!coords;
+  const fuelTypeOptions: { label: string; value: ConcreteFuelType }[] = FUEL_TYPES.map((fuel) => ({
+    label: FUEL_LABELS[fuel],
+    value: fuel,
+  }));
 
   // Turn the user's live coordinates into a readable place name for the fixed
   // "From" row — the trip always starts wherever they are now.
@@ -190,7 +206,7 @@ export function OnMyWayScreen({ navigation }: Props) {
             type: fuelType,
             sort: "dist",
           });
-          for (const station of result) {
+          for (const station of result.stations) {
             if (onRoute.has(station.id)) continue;
             const { distanceKm: offRoute, positionKm } = closestOnPolyline(polyline, cumDists, {
               lat: station.lat,
@@ -262,6 +278,17 @@ export function OnMyWayScreen({ navigation }: Props) {
             placeholderTextColor={colors.textMuted}
             returnKeyType="search"
             onSubmitEditing={search}
+          />
+        </View>
+        <View style={styles.fieldDivider} />
+        <View style={styles.fieldRow}>
+          <Ionicons name="water-outline" size={14} color={colors.accent} />
+          <Text style={styles.fuelRowLabel}>{t("filter.fuelType")}</Text>
+          <OptionDropdown
+            title={t("filter.fuelType")}
+            options={fuelTypeOptions}
+            value={fuelType}
+            onChange={setFuelType}
           />
         </View>
       </View>
@@ -408,6 +435,7 @@ function createStyles(colors: ColorScheme) {
       borderColor: colors.border,
     },
     fieldRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingHorizontal: spacing.md },
+    fuelRowLabel: { flex: 1, fontSize: 15, color: colors.textPrimary, paddingVertical: spacing.sm + 2 },
     fieldDotStart: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent, marginLeft: 3 },
     fieldDivider: { height: 1, backgroundColor: colors.border, marginLeft: spacing.md + 11 },
     fieldInput: {
