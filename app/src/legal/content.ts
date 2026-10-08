@@ -36,7 +36,7 @@ export const privacyPolicy: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Purchases and free trial",
-        body: "Tanka Pro is a one-time in-app purchase handled entirely by Apple — we never see your payment details. To unlock Pro on your account, our server asks Apple to confirm your purchase (it sends Apple the purchase's transaction ID) and stores that Pro is active together with that ID. If Apple tells us the purchase was refunded, Pro is switched off for it. Signed-in accounts get a free 5-day trial of the Pro features.",
+        body: "Tanka Pro is a one-time in-app purchase handled entirely by Apple (on iPhone) or Google Play (on Android) — we never see your payment details. To unlock Pro on your account, our server asks the store to confirm your purchase (it sends Apple the purchase's transaction ID, or Google Play the purchase token) and stores that Pro is active together with that ID or token. If the store tells us the purchase was refunded, Pro is switched off for it. Signed-in accounts get a free 5-day trial of the Pro features.",
       },
       {
         heading: "Keeping the free trial fair",
@@ -44,7 +44,7 @@ export const privacyPolicy: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Notifications",
-        body: "If you set a price alert, we store a device push token (via the Expo push notification service) so we can check prices periodically on our server and notify you even while the app is closed. We can't see or read the content of push notifications sent to other apps, and this token is only ever used to deliver your own price alerts.",
+        body: "If you set a price alert, we store a device push token (via the Expo push notification service, which uses Apple's push service on iPhone and Google's Firebase Cloud Messaging on Android) so we can check prices periodically on our server and notify you even while the app is closed. We can't see or read the content of push notifications sent to other apps, and this token is only ever used to deliver your own price alerts.",
       },
       {
         heading: "How long we keep data",
@@ -52,7 +52,7 @@ export const privacyPolicy: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "What we don't do",
-        body: "We don't show ads, use analytics or tracking SDKs, or sell or share your data with advertisers or data brokers. The only third parties involved are: API Aberta (fuel price data — no personal data is sent to it); Google (Routes API for \"On My Way\", and Sign in with Google if you choose it); Apple (Sign in with Apple, purchases and Apple Maps); Supabase (backend hosting for accounts and data, in the EU); and Expo (delivering push notifications and app updates).",
+        body: "We don't show ads, use analytics or tracking SDKs, or sell or share your data with advertisers or data brokers. The only third parties involved are: API Aberta (fuel price data — no personal data is sent to it); Google (Routes API for \"On My Way\", Sign in with Google if you choose it, and, on Android, Google Play for purchases and Firebase Cloud Messaging for notifications); Apple (Sign in with Apple, purchases and Apple Maps); Supabase (backend hosting for accounts and data, in the EU); and Expo (delivering push notifications and app updates).",
       },
       {
         heading: "Your rights",
@@ -90,7 +90,7 @@ export const privacyPolicy: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Compras e período experimental",
-        body: "O Tanka Pro é uma compra única na app, tratada inteiramente pela Apple — nunca vemos os teus dados de pagamento. Para desbloquear o Pro na tua conta, o nosso servidor pede à Apple que confirme a tua compra (envia à Apple o ID da transação) e guarda que o Pro está ativo, juntamente com esse ID. Se a Apple nos informar que a compra foi reembolsada, o Pro é desativado. As contas com sessão iniciada têm um período experimental gratuito de 5 dias das funcionalidades Pro.",
+        body: "O Tanka Pro é uma compra única na app, tratada inteiramente pela Apple (no iPhone) ou pelo Google Play (no Android) — nunca vemos os teus dados de pagamento. Para desbloquear o Pro na tua conta, o nosso servidor pede à loja que confirme a tua compra (envia à Apple o ID da transação, ou ao Google Play o token de compra) e guarda que o Pro está ativo, juntamente com esse ID ou token. Se a loja nos informar que a compra foi reembolsada, o Pro é desativado. As contas com sessão iniciada têm um período experimental gratuito de 5 dias das funcionalidades Pro.",
       },
       {
         heading: "Manter o período experimental justo",
@@ -98,7 +98,7 @@ export const privacyPolicy: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Notificações",
-        body: "Se configurares um alerta de preço, guardamos um token de notificações push do dispositivo (através do serviço de notificações push da Expo) para podermos verificar os preços periodicamente no nosso servidor e notificar-te mesmo com a app fechada. Não conseguimos ver nem aceder ao conteúdo de notificações push enviadas para outras apps, e este token só é usado para entregar os teus próprios alertas de preço.",
+        body: "Se configurares um alerta de preço, guardamos um token de notificações push do dispositivo (através do serviço de notificações push da Expo, que usa o serviço push da Apple no iPhone e o Firebase Cloud Messaging da Google no Android) para podermos verificar os preços periodicamente no nosso servidor e notificar-te mesmo com a app fechada. Não conseguimos ver nem aceder ao conteúdo de notificações push enviadas para outras apps, e este token só é usado para entregar os teus próprios alertas de preço.",
       },
       {
         heading: "Durante quanto tempo guardamos os dados",
@@ -106,7 +106,7 @@ export const privacyPolicy: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "O que não fazemos",
-        body: "Não mostramos anúncios, não usamos SDKs de análise ou rastreio, nem vendemos ou partilhamos os teus dados com anunciantes ou corretores de dados. Os únicos terceiros envolvidos são: a API Aberta (dados de preços de combustível — não lhe é enviado qualquer dado pessoal); a Google (API Routes para „A caminho\", e início de sessão com a Google se o escolheres); a Apple (início de sessão com a Apple, compras e Apple Maps); a Supabase (alojamento do backend para contas e dados, na UE); e a Expo (entrega de notificações push e atualizações da app).",
+        body: "Não mostramos anúncios, não usamos SDKs de análise ou rastreio, nem vendemos ou partilhamos os teus dados com anunciantes ou corretores de dados. Os únicos terceiros envolvidos são: a API Aberta (dados de preços de combustível — não lhe é enviado qualquer dado pessoal); a Google (API Routes para „A caminho\", início de sessão com a Google se o escolheres e, no Android, Google Play para compras e Firebase Cloud Messaging para notificações); a Apple (início de sessão com a Apple, compras e Apple Maps); a Supabase (alojamento do backend para contas e dados, na UE); e a Expo (entrega de notificações push e atualizações da app).",
       },
       {
         heading: "Os teus direitos",
@@ -143,7 +143,7 @@ export const terms: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Tanka Pro and free trial",
-        body: "Tanka Pro is a one-time purchase made through the App Store and is tied to your Apple ID and, when you are signed in, to your account. Payment, receipts and refunds are handled by Apple under its own terms; if a purchase is refunded, Pro is switched off. Signed-in accounts get a free 5-day trial, once per person. Features and prices may change for future purchases.",
+        body: "Tanka Pro is a one-time purchase made through the App Store (iPhone) or Google Play (Android) and is tied to your Apple ID or Google account and, when you are signed in, to your Tanka account. Payment, receipts and refunds are handled by Apple or Google under their own terms; if a purchase is refunded, Pro is switched off. Signed-in accounts get a free 5-day trial, once per person. Features and prices may change for future purchases.",
       },
       {
         heading: "Acceptable use",
@@ -159,7 +159,7 @@ export const terms: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Third-party services",
-        body: "The app relies on API Aberta (apiaberta.pt) for fuel price data, Google's Routes API for \"On My Way\" driving directions, Supabase for backend hosting, Expo for notifications and app updates, and Apple (purchases, maps and, if you sign in, authentication) or Google (if you sign in with Google). Your use of those services is also subject to their own terms.",
+        body: "The app relies on API Aberta (apiaberta.pt) for fuel price data, Google's Routes API for \"On My Way\" driving directions, Supabase for backend hosting, Expo for notifications and app updates, and Apple (purchases, maps and, if you sign in, authentication) or Google (Google Play purchases and notifications on Android and, if you sign in with Google, authentication). Your use of those services is also subject to their own terms.",
       },
       {
         heading: "Changes",
@@ -189,7 +189,7 @@ export const terms: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Tanka Pro e período experimental",
-        body: "O Tanka Pro é uma compra única feita através da App Store, associada ao teu ID Apple e, quando tens sessão iniciada, à tua conta. O pagamento, os recibos e os reembolsos são tratados pela Apple, ao abrigo dos seus próprios termos; se uma compra for reembolsada, o Pro é desativado. As contas com sessão iniciada têm um período experimental gratuito de 5 dias, uma vez por pessoa. As funcionalidades e os preços podem mudar para compras futuras.",
+        body: "O Tanka Pro é uma compra única feita através da App Store (iPhone) ou do Google Play (Android), associada ao teu ID Apple ou conta Google e, quando tens sessão iniciada, à tua conta Tanka. O pagamento, os recibos e os reembolsos são tratados pela Apple ou pela Google, ao abrigo dos seus próprios termos; se uma compra for reembolsada, o Pro é desativado. As contas com sessão iniciada têm um período experimental gratuito de 5 dias, uma vez por pessoa. As funcionalidades e os preços podem mudar para compras futuras.",
       },
       {
         heading: "Utilização aceitável",
@@ -205,7 +205,7 @@ export const terms: { pt: LegalDoc; en: LegalDoc } = {
       },
       {
         heading: "Serviços de terceiros",
-        body: "A app depende da API Aberta (apiaberta.pt) para os dados de preços de combustível, da API Routes da Google para os trajetos de „A caminho\", da Supabase para o alojamento do backend, da Expo para notificações e atualizações da app, e da Apple (compras, mapas e, se iniciares sessão, autenticação) ou da Google (se iniciares sessão com a Google). A tua utilização desses serviços está também sujeita aos respetivos termos próprios.",
+        body: "A app depende da API Aberta (apiaberta.pt) para os dados de preços de combustível, da API Routes da Google para os trajetos de „A caminho\", da Supabase para o alojamento do backend, da Expo para notificações e atualizações da app, e da Apple (compras, mapas e, se iniciares sessão, autenticação) ou da Google (compras no Google Play e notificações no Android e, se iniciares sessão com a Google, autenticação). A tua utilização desses serviços está também sujeita aos respetivos termos próprios.",
       },
       {
         heading: "Alterações",

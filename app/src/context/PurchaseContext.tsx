@@ -378,12 +378,21 @@ function RealPurchaseProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
   const rememberTransaction = useCallback((purchase: Purchase) => {
-    const id = (purchase as { transactionId?: string | null }).transactionId ?? purchase.id;
+    const token = purchase.purchaseToken;
+    // On Android the purchase token is what Google Play is asked about, so it
+    // doubles as the id when the order id isn't available (e.g. on restore).
+    const id =
+      (purchase as { transactionId?: string | null }).transactionId ??
+      purchase.id ??
+      (Platform.OS === "android" && typeof token === "string" ? token : null);
     if (!id) return;
     // On iOS the purchase token is StoreKit's signed record (three dot-
-    // separated parts); keep it only if it really looks like one.
-    const token = purchase.purchaseToken;
-    if (typeof token === "string" && token.split(".").length === 3) {
+    // separated parts); keep it only if it really looks like one. On Android
+    // it is Google Play's opaque purchase token.
+    const looksRight =
+      typeof token === "string" &&
+      (Platform.OS === "android" ? token.length >= 20 : token.split(".").length === 3);
+    if (looksRight) {
       proSignedRef.current = token;
       AsyncStorage.setItem(PRO_SIGNED_KEY, token).catch(() => undefined);
     }

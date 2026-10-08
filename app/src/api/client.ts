@@ -122,34 +122,45 @@ export async function fetchStationPrices(
 }
 
 // Asks the backend to mark the signed-in account as Pro. The backend does not
-// take our word for it: it looks the Apple transaction up at Apple (App Store
-// Server API) and only records Pro if Apple confirms a real, unrevoked
-// purchase of this product for this app. It must go through this
-// authenticated endpoint rather than writing user_data.has_pro directly,
-// which the database rejects from anything but the service role (see
+// take our word for it: it looks the purchase up at the store (Apple's App
+// Store Server API, or Google's Play Developer API for Android) and only
+// records Pro if the store confirms a real, unrevoked purchase of this product
+// for this app. It must go through this authenticated endpoint rather than
+// writing user_data.has_pro directly, which the database rejects from
+// anything but the service role (see
 // supabase/migrations/20260926120000_security_hardening.sql).
+// `receipt` is StoreKit's signed record on iOS (optional backup proof) and
+// the Google Play purchase token on Android (required).
 export async function confirmPurchase(
   productId: string,
   transactionId: string,
   platform: string,
-  signedTransaction?: string
+  receipt?: string
 ): Promise<void> {
   const { data: sessionData } = await supabase.auth.getSession();
   const userToken = sessionData.session?.access_token;
   if (!userToken) return;
-  const res = await fetch(`${FUNCTIONS_BASE_URL}/confirm-purchase`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${userToken}`,
-      apikey: SUPABASE_ANON_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ productId, transactionId, platform, signedTransaction }),
-  });
+  const isAndroid = platform === "android";
+  const res = await fetch(
+    `${FUNCTIONS_BASE_URL}/${isAndroid ? "confirm-purchase-google" : "confirm-purchase"}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        apikey: SUPABASE_ANON_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(
+        isAndroid
+          ? { productId, purchaseToken: receipt }
+          : { productId, transactionId, platform, signedTransaction: receipt }
+      ),
+    }
+  );
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    // `code` tells the app why the backend refused: "revoked" = Apple refunded
-    // this purchase, so the app must lock Pro again.
+    // `code` tells the app why the backend refused: "revoked" = the store
+    // refunded this purchase, so the app must lock Pro again.
     const err = new Error(body.error ?? `Request failed with status ${res.status}`) as Error & {
       code?: string;
     };
