@@ -2,7 +2,7 @@
   "expo": {
     "name": "Tanka",
     "slug": "tanka",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "scheme": "tanka",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -65,7 +65,15 @@
           "iosUrlScheme": "com.googleusercontent.apps.598383804471-30clmudvk67iplga0le45rnb0k5lfdc4"
         }
       ],
-      "expo-iap"
+      "expo-iap",
+      [
+        "./plugins/withMetaIOS",
+        {
+          "appID": "3776002802547474",
+          "clientToken": "5a4fc58268ada3c49851ca795faf771e",
+          "displayName": "Tanka"
+        }
+      ]
     ],
     "owner": "aniro99",
     "extra": {

@@ -16,6 +16,10 @@ import { RootNavigator } from "./src/navigation/RootNavigator";
 import { ProPaywallModal } from "./src/components/ProPaywallModal";
 import { AppReviewPrompt } from "./src/components/AppReviewPrompt";
 import { OnboardingScreen } from "./src/screens/OnboardingScreen";
+import { startMetaSdk } from "./src/lib/metaSdk";
+
+// As early as possible, per Meta's setup notes (iPhone only, see the file).
+startMetaSdk();
 
 // Set once, the first time a user ever signs in OR buys Pro outright.
 // Onboarding is a one-time gate — either path proves they're past it, and
